@@ -294,7 +294,14 @@ function noteRevealedWord(w){
  revealedWords.add(selectedHintId(w));
  try{localStorage.setItem(HINT_STORE,JSON.stringify([...revealedWords].slice(-5000)))}catch(e){}
 }
+let previousSelectedHint=null;
 function updateSelectedClue(w){
+ const id=w?selectedHintId(w):null;
+ if(id!==previousSelectedHint){
+  previousSelectedHint=id;
+  const notice=$('puzzleWordMessage');
+  if(notice){notice.textContent='선택한 낱말을 입력하고 채점하거나 정답을 확인하세요.';if(notice.parentElement)delete notice.parentElement.dataset.result}
+ }
  const label=$('puzzleSelectedWord');if(!label)return;
  label.textContent=w?(w.dir==='across'?'가로 ':'세로 ')+w.number+'번 · '+w.ko+' ('+[...w.word].length+'글자)':'가로·세로 힌트에서 낱말을 선택하세요.';
 }
@@ -397,7 +404,7 @@ $('puzzleCheck').onclick=()=>{if(!puzzle)return;var ok=0,all=0;
 document.querySelectorAll('#puzzleGrid input').forEach(el=>{var [r,c]=el.dataset.position.split(',').map(Number);var right=el.value.normalize('NFKC')===puzzle.grid[r][c];el.classList.toggle('correct',right);ok+=right?1:0;all++});
 var puzzleId=($('puzzleDifficulty')?.value||'medium')+'|'+String($('puzzleNumber').value||1);
 puzzle.placed.forEach(w=>{var solved=[...w.word].every((char,i)=>{var el=focusCell(w,i);return !!el&&el.value.trim().normalize('NFKC')===char});if(solved&&!revealedWords.has(selectedHintId(w)))petReward('crossword',puzzleId+'|'+w.word+'|'+w.dir+'|'+w.row+'|'+w.col)});
-if(ok===all&&all>0)petReward('crosswordComplete',puzzleId);
+if(ok===all&&all>0&&!puzzle.placed.some(w=>revealedWords.has(selectedHintId(w))))petReward('crosswordComplete',puzzleId);
 $('puzzleMessage').textContent='맞힌 칸 '+ok+' / '+all+' · '+(ok===all?'축하합니다!':'정답이 아닌 칸을 다시 확인해 보세요.')};
 function report(){var items=[['총 대화',progress.turns+'회'],['응답 연습',progress.attempts+'회'],['대화 응답률 (휴리스틱)',progress.attempts?Math.round(progress.understood/progress.attempts*100)+'%':'—'],['대화 퀴즈',progress.quizzes?Math.round(progress.quizCorrect/progress.quizzes*100)+'%':'—'],['기억한 단어',progress.known.length+'개'],['학습 난이도','Lv.'+progress.level]];$('reportStats').innerHTML=items.map(x=>'<div class="stat"><strong>'+esc(x[1])+'</strong><span>'+esc(x[0])+'</span></div>').join('');$('reportDetails').innerHTML='<h3>현재 난이도 Lv.'+progress.level+' / 8</h3><div class="progressbar"><span style="width:'+(progress.level/8*100)+'%"></span></div><p>지금 버전은 긴 답변과 의미 관련 단서 등을 활용하는 <b>연습용 규칙 기반 수준</b>입니다. 실제 일본인 화자의 이해도를 정확히 판단하거나 공인 일본어 능력시험 등급을 인증하지 않습니다.</p><p>일본어 문맥 이해와 문법 교정은 현재 규칙 기반입니다. 실제 의미 기반 AI 연동은 추후 필요합니다. 현재 연결된 외부 과금 API는 없습니다.</p>'}
 $('clearProgress').onclick=()=>{if(confirm('이 기기의 학습 기록을 초기화할까요?')){progress=Object.assign({},DEFAULT);persist();report();wordFilter()}};
