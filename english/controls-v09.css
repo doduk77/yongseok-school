@@ -1,0 +1,20 @@
+/* v0.9 — English/Japanese quick switch and per-word crossword feedback */
+.topnav .course-switch{display:flex;gap:3px;align-items:center;flex:none;padding:3px;background:#e8f5f1;border:1px solid #c6e5dc;border-radius:16px}
+.topnav .course-switch .course-switch-btn{padding:8px 10px;border-radius:12px;min-height:39px;background:transparent;color:#416b70;border:2px solid transparent;font-size:13px;font-weight:800;white-space:nowrap}
+.topnav .course-switch .course-switch-btn.course-active{background:#fff;color:#146f65;border-color:#52b19c;box-shadow:0 1px 4px #82aaa833}
+.topnav .course-switch .course-switch-btn:hover{background:#f5fffd}
+.topnav .course-switch .course-switch-btn.course-active:hover{background:#fff}
+.single-word-panel{background:#f4fbf8;border:2px solid #badfd4;border-radius:16px;margin:12px 0;padding:12px 15px;display:grid;gap:7px}
+.single-word-panel strong{font-weight:850;color:#226c68;font-size:14px}
+.single-word-panel div{font-size:13px;color:#476875;line-height:1.55;overflow-wrap:anywhere}
+.single-word-panel[data-result="correct"]{background:#e7f8e9;border-color:#70bf87}
+.single-word-panel[data-result="wrong"]{background:#fff4e5;border-color:#e9bf74}
+.single-word-panel[data-result="revealed"]{background:#eaf0ff;border-color:#a8bdeb}
+.puzzle-grid .crosscell input.word-wrong{background:#fff0d6;border-color:#d1a354}
+.puzzle-grid .crosscell input.correct{background:#d8f9e8}
+@media(max-width:650px){
+ .topnav .course-switch{padding:2px;border-radius:12px;gap:1px}
+ .topnav .course-switch .course-switch-btn{min-height:36px;padding:7px 8px;font-size:12px;border-radius:9px}
+ .single-word-panel{padding:10px 12px}
+ #puzzleWordCheck,#puzzleWordReveal{font-size:12px;padding:9px 12px;min-height:39px}
+}
