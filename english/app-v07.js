@@ -10,10 +10,42 @@ var DEFAULT={level:1,attempts:0,understood:0,quizzes:0,quizCorrect:0,known:[],tu
 var progress;
 try{progress=Object.assign({},DEFAULT,JSON.parse(localStorage.getItem('yanado_v03')||'{}'))}catch(e){progress=Object.assign({},DEFAULT)}
 if(!Array.isArray(progress.known))progress.known=[];
-var enVoice=null;
-function voices(){if(!window.speechSynthesis)return;var list=speechSynthesis.getVoices()||[];enVoice=list.find(v=>v.lang.toLowerCase()==='en-us' && /natural|enhanced|premium/i.test(v.name))||list.find(v=>v.lang.toLowerCase()==='en-us')||list.find(v=>v.lang.startsWith('en'))||null}
-if(window.speechSynthesis){voices();speechSynthesis.onvoiceschanged=voices}
-function say(en){if(!('speechSynthesis' in window))return;voices();speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(en);u.lang='en-US';u.rate=Number(($('speakSpeed')||{}).value||1);u.pitch=1;u.volume=1;if(enVoice)u.voice=enVoice;speechSynthesis.speak(u)}
+
+var enVoice=null,VOICE_KEY='yanado_voice_gender_v07',voiceGender='female';
+try{voiceGender=localStorage.getItem(VOICE_KEY)==='male'?'male':'female'}catch(e){}
+const voiceNames={female:/samantha|ava|karen|victoria|susan|allison|joanna|jenny|zira|aria|jessa|female|woman/i,
+male:/alex|daniel|fred|tom|aaron|matthew|david|guy|james|brian|male|man/i};
+function voices(){
+ if(!window.speechSynthesis)return;
+ const list=(window.speechSynthesis.getVoices()||[]).filter(v=>v.lang&&/^en/i.test(v.lang));
+ const us=list.filter(v=>/^en[-_]us$/i.test(v.lang));
+ const pool=us.length?us:list;
+ enVoice=pool.find(v=>voiceNames[voiceGender].test(v.name))
+   ||pool.find(v=>/natural|enhanced|premium/i.test(v.name))
+   ||pool[0]||null;
+}
+if(window.speechSynthesis){voices();window.speechSynthesis.onvoiceschanged=voices}
+function say(en){
+ if(!('speechSynthesis' in window))return;
+ voices();window.speechSynthesis.cancel();
+ var u=new SpeechSynthesisUtterance(en);
+ u.lang='en-US';u.rate=Number(($('speakSpeed')||{}).value||1);
+ u.pitch=voiceGender==='female'?1.06:1;u.volume=1;
+ if(enVoice)u.voice=enVoice;
+ window.speechSynthesis.speak(u);
+}
+function changeVoice(g){
+ voiceGender=g==='male'?'male':'female';
+ try{localStorage.setItem(VOICE_KEY,voiceGender)}catch(e){}
+ if($('voiceGender'))$('voiceGender').value=voiceGender;
+ if($('voiceGenderApp'))$('voiceGenderApp').value=voiceGender;
+ voices();
+}
+['voiceGender','voiceGenderApp'].forEach(id=>{
+ if($(id)){$(id).value=voiceGender;$(id).addEventListener('change',e=>changeVoice(e.target.value))}
+});
+if($('voicePreview'))$('voicePreview').addEventListener('click',()=>say("Hi there! I'm your friendly English speaking partner. Let's get started!"));
+
 function persist(){try{localStorage.setItem('yanado_v03',JSON.stringify(progress))}catch(e){}$('badgeLevel').textContent='대화 Lv.'+progress.level}
 function page(id){document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id===id));document.querySelectorAll('#topnav button').forEach(el=>el.classList.toggle('active',el.dataset.tab===id));if(id==='report')report();window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>page(b.dataset.tab)));
