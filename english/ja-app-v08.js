@@ -286,6 +286,18 @@ $('wordSearch').addEventListener('input',wordFilter);$('wordGroup').onchange=wor
 $('wordVisual').onchange=renderWords;
 // Crossword: deterministic puzzle IDs, 20+ placed words required for a playable board.
 var PNUM=400,puzzle=null,selected=null;
+const CROSS_LANG='ja',HINT_STORE='yanado_crossword_hints_v09';
+let storedHints=[];try{const raw=JSON.parse(localStorage.getItem(HINT_STORE)||'[]');if(Array.isArray(raw))storedHints=raw.slice(-5000).filter(x=>typeof x==='string')}catch(e){}
+const revealedWords=new Set(storedHints);
+function selectedHintId(w){return CROSS_LANG+'|'+($('puzzleDifficulty')?.value||'medium')+'|'+String($('puzzleNumber')?.value||'1')+'|'+w.word+'|'+w.dir+'|'+w.row+'|'+w.col}
+function noteRevealedWord(w){
+ revealedWords.add(selectedHintId(w));
+ try{localStorage.setItem(HINT_STORE,JSON.stringify([...revealedWords].slice(-5000)))}catch(e){}
+}
+function updateSelectedClue(w){
+ const label=$('puzzleSelectedWord');if(!label)return;
+ label.textContent=w?(w.dir==='across'?'가로 ':'세로 ')+w.number+'번 · '+w.ko+' ('+[...w.word].length+'글자)':'가로·세로 힌트에서 낱말을 선택하세요.';
+}
 for(var n=1;n<=PNUM;n++)$('puzzleNumber').add(new Option('퍼즐 '+n,n));
 function rng(seed){var x=seed|0;return function(){x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296}}
 function shuffle(list,random){for(var i=list.length-1;i>0;i--){var j=Math.floor(random()*(i+1));var t=list[i];list[i]=list[j];list[j]=t}return list}
@@ -327,19 +339,64 @@ best.placed.sort((a,b)=>a.row-b.row||a.col-b.col);
 best.placed.forEach(w=>{var id=w.row+','+w.col;if(!numbering.has(id))numbering.set(id,++count);w.number=numbering.get(id)});
 best.numbering=numbering;return best}
 function focusCell(p,i){var row=p.row+(p.dir==='down'?i:0),col=p.col+(p.dir==='across'?i:0);return $('puzzleGrid').querySelector('[data-position="'+row+','+col+'"]')}
-function selectWord(p,index){selected=p;document.querySelectorAll('#puzzleClues .clue').forEach(b=>b.classList.toggle('active',b.dataset.word===p.word));document.querySelectorAll('#puzzleGrid input').forEach(el=>el.classList.remove('chosen'));for(var i=0;i<p.word.length;i++){var x=focusCell(p,i);if(x)x.classList.add('chosen')}var cell=focusCell(p,index||0);if(cell){cell.focus();cell.select()}}
-function renderPuzzle(num){puzzle=buildPuzzle(num);var msg=$('puzzleMessage');if(!puzzle){$('puzzleGrid').innerHTML='';$('puzzleClues').innerHTML='';$('puzzleInfo').textContent='재생성 필요';msg.textContent='20단어 이상을 배치하지 못했습니다. 다른 번호를 선택해 주세요.';return}var coords=[];for(var y=0;y<puzzle.size;y++)for(var x=0;x<puzzle.size;x++)if(puzzle.grid[y][x])coords.push([y,x]);var minY=Math.min(...coords.map(v=>v[0])),maxY=Math.max(...coords.map(v=>v[0])),minX=Math.min(...coords.map(v=>v[1])),maxX=Math.max(...coords.map(v=>v[1]));var cols=maxX-minX+1;var board=$('puzzleGrid');board.innerHTML='';board.style.gridTemplateColumns='repeat('+cols+',var(--crossSize, 29px))';var byPos=new Map();
+function selectWord(p,index){selected=p;updateSelectedClue(p);document.querySelectorAll('#puzzleClues .clue').forEach(b=>b.classList.toggle('active',b.dataset.word===p.word));document.querySelectorAll('#puzzleGrid input').forEach(el=>el.classList.remove('chosen'));for(var i=0;i<p.word.length;i++){var x=focusCell(p,i);if(x)x.classList.add('chosen')}var cell=focusCell(p,index||0);if(cell){cell.focus();cell.select()}}
+function renderPuzzle(num){
+ selected=null;
+ const panel=$('puzzleWordMessage'),box=panel?.parentElement;
+ if(panel)panel.textContent='힌트를 누르고 낱말을 입력하세요. 하나만 채점하거나 정답을 볼 수 있습니다.';
+ if(box)delete box.dataset.result;
+ updateSelectedClue(null);
+ puzzle=buildPuzzle(num);var msg=$('puzzleMessage');if(!puzzle){$('puzzleGrid').innerHTML='';$('puzzleClues').innerHTML='';$('puzzleInfo').textContent='재생성 필요';msg.textContent='20단어 이상을 배치하지 못했습니다. 다른 번호를 선택해 주세요.';return}var coords=[];for(var y=0;y<puzzle.size;y++)for(var x=0;x<puzzle.size;x++)if(puzzle.grid[y][x])coords.push([y,x]);var minY=Math.min(...coords.map(v=>v[0])),maxY=Math.max(...coords.map(v=>v[0])),minX=Math.min(...coords.map(v=>v[1])),maxX=Math.max(...coords.map(v=>v[1]));var cols=maxX-minX+1;var board=$('puzzleGrid');board.innerHTML='';board.style.gridTemplateColumns='repeat('+cols+',var(--crossSize, 29px))';var byPos=new Map();
 puzzle.placed.forEach(w=>{for(var i=0;i<w.word.length;i++){var key=(w.row+(w.dir==='down'?i:0))+','+(w.col+(w.dir==='across'?i:0));if(!byPos.has(key))byPos.set(key,[]);byPos.get(key).push({p:w,i})}});
 for(var y=minY;y<=maxY;y++)for(var x=minX;x<=maxX;x++){var wrap=document.createElement('div');wrap.className='crosscell';if(!puzzle.grid[y][x])wrap.classList.add('black');else{var input=document.createElement('input');input.type='text';input.maxLength=2;input.autocomplete='off';input.autocorrect='off';input.spellcheck=false;input.autocapitalize='off';input.inputMode='text';input.dataset.position=y+','+x;input.setAttribute('aria-label','일본어 가로세로 '+(y+1)+','+(x+1));input.setAttribute('lang','ja');var candidates=byPos.get(y+','+x)||[];input.addEventListener('focus',()=>{if(!selected||!candidates.some(c=>c.p===selected))selected=candidates[0]?.p||selected;if(selected)selectWordHighlight(selected)});input.addEventListener('click',()=>{if(!selected||!candidates.some(c=>c.p===selected)){selected=candidates[0]?.p;selectWordHighlight(selected)}else if(candidates.length>1){var other=candidates.find(c=>c.p!==selected);if(other){selected=other.p;selectWordHighlight(selected)}}});input.addEventListener('input',(event)=>{if(event.isComposing)return;var s=(input.value||'').normalize('NFKC').replace(/[^ぁ-ゟァ-ヿー]/gu,'');input.value=[...s].slice(-1).join('');if(!input.value)return;var active=candidates.find(c=>c.p===selected)||candidates[0];if(active){selected=active.p;selectWordHighlight(selected);var next=focusCell(selected,active.i+1);if(next){next.focus();next.select()}}});input.addEventListener('keydown',e=>{var active=candidates.find(c=>c.p===selected)||candidates[0];if(!active)return;if(e.key==='Backspace'&&!input.value){var previous=focusCell(active.p,active.i-1);if(previous){previous.focus();previous.value='';e.preventDefault()}}if(e.key==='ArrowRight'||e.key==='ArrowDown'){var next=focusCell(active.p,active.i+1);if(next){next.focus();e.preventDefault()}}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){var prev=focusCell(active.p,active.i-1);if(prev){prev.focus();e.preventDefault()}}});wrap.appendChild(input);var numHere=puzzle.numbering.get(y+','+x);if(numHere){var numEl=document.createElement('span');numEl.className='crossnum';numEl.textContent=numHere;wrap.appendChild(numEl)}}board.appendChild(wrap)}
 var clueWrap=$('puzzleClues');clueWrap.innerHTML='';['across','down'].forEach(dir=>{var panel=document.createElement('div');panel.className='cluepanel';panel.innerHTML='<h3>'+(dir==='across'?'가로':'세로')+' ('+puzzle.placed.filter(x=>x.dir===dir).length+')</h3>';puzzle.placed.filter(x=>x.dir===dir).sort((a,b)=>a.number-b.number).forEach(w=>{var b=document.createElement('button');b.className='clue';b.dataset.word=w.word;b.textContent=w.number+'. '+w.ko+' ('+w.word.length+'글자)';b.onclick=()=>selectWord(w,0);panel.appendChild(b)});clueWrap.appendChild(panel)});
 $('puzzleInfo').textContent='실제 교차 단어 '+puzzle.placed.length+'개';msg.textContent='ひらがな・カタカナ를 입력하면 다음 칸으로 이동합니다. 일본어 키보드를 사용하세요.';selected=puzzle.placed[0];selectWordHighlight(selected)}
-function selectWordHighlight(p){if(!p)return;document.querySelectorAll('#puzzleClues .clue').forEach(b=>b.classList.toggle('active',b.dataset.word===p.word));document.querySelectorAll('#puzzleGrid input').forEach(el=>el.classList.remove('chosen'));for(var i=0;i<p.word.length;i++){var cell=focusCell(p,i);if(cell)cell.classList.add('chosen')}}
+function selectWordHighlight(p){if(!p)return;updateSelectedClue(p);document.querySelectorAll('#puzzleClues .clue').forEach(b=>b.classList.toggle('active',b.dataset.word===p.word));document.querySelectorAll('#puzzleGrid input').forEach(el=>el.classList.remove('chosen'));for(var i=0;i<p.word.length;i++){var cell=focusCell(p,i);if(cell)cell.classList.add('chosen')}}
 $('puzzleNumber').onchange=()=>renderPuzzle(Number($('puzzleNumber').value));
 $('puzzleDifficulty').onchange=()=>renderPuzzle(Number($('puzzleNumber').value));$('puzzleNext').onclick=()=>{$('puzzleNumber').value=1+Math.floor(Math.random()*PNUM);renderPuzzle(Number($('puzzleNumber').value))};
+
+function selectedWordCells(w){return [...w.word].map((_,i)=>focusCell(w,i))}
+function charValue(v){
+ const txt=String(v||'').trim();
+ return CROSS_LANG==='ja'?txt.normalize('NFKC'):txt.toUpperCase();
+}
+function wordRewardId(w){
+ return ($('puzzleDifficulty')?.value||'medium')+'|'+String($('puzzleNumber')?.value||1)+'|'+w.word+'|'+w.dir+'|'+w.row+'|'+w.col;
+}
+function tellWordResult(message,result){
+ const node=$('puzzleWordMessage');
+ if(node){node.textContent=message;if(node.parentElement)node.parentElement.dataset.result=result}
+}
+$('puzzleWordCheck').onclick=()=>{
+ if(!puzzle||!selected){tellWordResult('먼저 가로 또는 세로에서 낱말을 선택해 주세요.','wrong');return}
+ const letters=[...selected.word],cells=selectedWordCells(selected);
+ const filled=cells.filter(cell=>cell&&charValue(cell.value)).length;
+ const matched=letters.filter((letter,i)=>cells[i]&&charValue(cells[i].value)===letter).length;
+ cells.forEach((cell,i)=>{
+  if(!cell)return;
+  const good=charValue(cell.value)===letters[i];
+  cell.classList.toggle('correct',good);
+  cell.classList.toggle('word-wrong',!!charValue(cell.value)&&!good);
+ });
+ if(matched===letters.length){
+   tellWordResult('✅ '+selected.number+'번 정답입니다! '+selected.ko+' = '+selected.word,'correct');
+   if(!revealedWords.has(selectedHintId(selected)))petReward('crossword',wordRewardId(selected));
+ }else if(!filled){
+   tellWordResult('✏️ '+selected.number+'번 낱말을 먼저 입력해 주세요. 힌트: '+selected.ko,'wrong');
+ }else{
+   tellWordResult('🟠 '+selected.number+'번 · '+letters.length+'글자 중 '+matched+'글자가 맞았습니다. 나머지를 다시 확인해 보세요.','wrong');
+ }
+};
+$('puzzleWordReveal').onclick=()=>{
+ if(!puzzle||!selected){tellWordResult('먼저 낱말을 선택해 주세요.','wrong');return}
+ noteRevealedWord(selected);
+ tellWordResult('👁 '+selected.number+'번 정답: '+selected.word+' · '+selected.ko+' (정답을 본 낱말은 먹이 보상에서 제외됩니다.)','revealed');
+};
+
 $('puzzleCheck').onclick=()=>{if(!puzzle)return;var ok=0,all=0;
 document.querySelectorAll('#puzzleGrid input').forEach(el=>{var [r,c]=el.dataset.position.split(',').map(Number);var right=el.value.normalize('NFKC')===puzzle.grid[r][c];el.classList.toggle('correct',right);ok+=right?1:0;all++});
 var puzzleId=($('puzzleDifficulty')?.value||'medium')+'|'+String($('puzzleNumber').value||1);
-puzzle.placed.forEach(w=>{var solved=[...w.word].every((char,i)=>{var el=focusCell(w,i);return !!el&&el.value.trim().normalize('NFKC')===char});if(solved)petReward('crossword',puzzleId+'|'+w.word+'|'+w.dir+'|'+w.row+'|'+w.col)});
+puzzle.placed.forEach(w=>{var solved=[...w.word].every((char,i)=>{var el=focusCell(w,i);return !!el&&el.value.trim().normalize('NFKC')===char});if(solved&&!revealedWords.has(selectedHintId(w)))petReward('crossword',puzzleId+'|'+w.word+'|'+w.dir+'|'+w.row+'|'+w.col)});
 if(ok===all&&all>0)petReward('crosswordComplete',puzzleId);
 $('puzzleMessage').textContent='맞힌 칸 '+ok+' / '+all+' · '+(ok===all?'축하합니다!':'정답이 아닌 칸을 다시 확인해 보세요.')};
 function report(){var items=[['총 대화',progress.turns+'회'],['응답 연습',progress.attempts+'회'],['대화 응답률 (휴리스틱)',progress.attempts?Math.round(progress.understood/progress.attempts*100)+'%':'—'],['대화 퀴즈',progress.quizzes?Math.round(progress.quizCorrect/progress.quizzes*100)+'%':'—'],['기억한 단어',progress.known.length+'개'],['학습 난이도','Lv.'+progress.level]];$('reportStats').innerHTML=items.map(x=>'<div class="stat"><strong>'+esc(x[1])+'</strong><span>'+esc(x[0])+'</span></div>').join('');$('reportDetails').innerHTML='<h3>현재 난이도 Lv.'+progress.level+' / 8</h3><div class="progressbar"><span style="width:'+(progress.level/8*100)+'%"></span></div><p>지금 버전은 긴 답변과 의미 관련 단서 등을 활용하는 <b>연습용 규칙 기반 수준</b>입니다. 실제 일본인 화자의 이해도를 정확히 판단하거나 공인 일본어 능력시험 등급을 인증하지 않습니다.</p><p>일본어 문맥 이해와 문법 교정은 현재 규칙 기반입니다. 실제 의미 기반 AI 연동은 추후 필요합니다. 현재 연결된 외부 과금 API는 없습니다.</p>'}
