@@ -26,7 +26,7 @@ function evaluate({question,answer,sample,topic}={}){
  const label='브라우저 규칙 기반 추정 · 실제 원어민 이해도 평가 아님';
  if(!a)return {kind:'unclear',accepted:false,title:'🟠 추가 확인 필요',detail:'아직 대답이 없습니다. 짧게라도 영어로 말해 보세요.',example:sample||'',disclaimer:label};
  if(tokens.length>65)return {kind:'unclear',accepted:false,title:'🟠 추가 확인 필요',detail:'대답이 너무 깁니다. 중요한 내용부터 간단히 알려주세요.',example:sample||'',disclaimer:label};
- const yesNo=/^(are|is|do|does|did|have|has|can|could|would|will|should|may|were|was)\b/.test(q);
+ const yesNo=/^(are|is|do|does|did|have|has|can|could|would|will|should|may|were|was)\b/.test(q)||/\b(do you|does it|are you|is there|have you|would you|can you|could you|will you|did you|should we)\b/.test(q);
  const wh=/^(what|where|when|why|who|which|how)\b/.test(q);
  const politeResponse=polite.test(a) && tokens.length<=3;
  if(yesNo && genericAgreement.test(a))return {kind:'clear',accepted:true,title:'🟢 뜻이 통할 가능성 높음',detail:'예/아니요 또는 동의 의사가 질문에 맞게 전달됩니다. 문법은 별도로 익혀도 괜찮아요.',example:sample||'',disclaimer:label};
