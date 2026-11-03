@@ -243,10 +243,39 @@ $('quizWords').onclick=()=>{
 $('quizNext').onclick=()=>{quizSeed++;makeQuiz()};$('quizTopic').onchange=()=>{quizSeed++;makeQuiz()};
 // Vocabulary
 var pageWords=0,unknownOnly=false,visibleWords=[];
-var groups=[...new Set(D.WORDS.map(w=>w.group))];groups.forEach(g=>$('wordGroup').add(new Option(g,g)));
+var groups=[...new Set(D.WORDS.map(w=>w.group))];groups.forEach(g=>$('wordGroup').add(new Option(D.GROUP_KO?.[g]||g,g)));
 function wordFilter(){var query=$('wordSearch').value.trim().toLowerCase(),group=$('wordGroup').value;visibleWords=D.WORDS.filter(w=>(group==='all'||w.group===group)&&(!unknownOnly||!progress.known.includes(w.word))&&(!query||w.word.toLowerCase().includes(query)||w.ko.includes(query)));pageWords=0;renderWords()}
-function renderWords(){var count=Math.min(visibleWords.length,(pageWords+1)*45),area=$('wordGrid');area.innerHTML='';visibleWords.slice(0,count).forEach(w=>{var card=document.createElement('div');card.className='wordcard';card.innerHTML='<div class="wordicon" aria-hidden="true">'+esc(w.icon)+'</div><strong>'+esc(w.word.toLowerCase())+'</strong><span class="meaning" hidden>'+esc(w.ko)+'</span><div class="wordactions"><button class="minibtn meaningbtn">뜻 보기</button><button class="minibtn voicebtn">🔊</button><button class="minibtn knownbtn'+(progress.known.includes(w.word)?' known':'')+'">'+(progress.known.includes(w.word)?'✓ 암기':'○ 암기')+'</button></div>';card.querySelector('.meaningbtn').onclick=()=>{var meaning=card.querySelector('.meaning');meaning.hidden=!meaning.hidden;card.querySelector('.meaningbtn').textContent=meaning.hidden?'뜻 보기':'뜻 숨기기';if(!meaning.hidden)petReward('word',w.word)};card.querySelector('.voicebtn').onclick=()=>{say(w.word.toLowerCase());petReward('word',w.word)};card.querySelector('.knownbtn').onclick=()=>{var adding=!progress.known.includes(w.word);if(!adding)progress.known=progress.known.filter(x=>x!==w.word);else progress.known.push(w.word);persist();if(adding)petReward('word',w.word);renderWords()};area.appendChild(card)});$('wordCount').textContent=count+' / '+visibleWords.length+'개';$('wordMore').hidden=count>=visibleWords.length}
+
+function renderWords(){
+ const count=Math.min(visibleWords.length,(pageWords+1)*45),area=$('wordGrid');
+ area.innerHTML='';
+ visibleWords.slice(0,count).forEach(w=>{
+  const card=document.createElement('div');card.className='wordcard';
+  const showVisual=($('wordVisual')?.value||'simple')!=='text';
+  const pict=D.VISUALS?.get(w.word)||null;
+  const iconHTML=showVisual
+    ?'<div class="wordicon'+(!pict?' wordmonogram':'')+'" aria-hidden="true">'+(pict?esc(pict):esc(w.word.slice(0,2)))+'</div>'
+    :'';
+  card.innerHTML=iconHTML+'<strong>'+esc(w.word.toLowerCase())+'</strong><span class="meaning" hidden>'+esc(w.ko)+'</span><div class="wordactions"><button class="minibtn meaningbtn">뜻 보기</button><button class="minibtn voicebtn">🔊</button><button class="minibtn knownbtn'+(progress.known.includes(w.word)?' known':'')+'">'+(progress.known.includes(w.word)?'✓ 암기':'○ 암기')+'</button></div>';
+  card.querySelector('.meaningbtn').onclick=()=>{
+   const meaning=card.querySelector('.meaning');meaning.hidden=!meaning.hidden;
+   card.querySelector('.meaningbtn').textContent=meaning.hidden?'뜻 보기':'뜻 숨기기';
+   if(!meaning.hidden)petReward('word',w.word);
+  };
+  card.querySelector('.voicebtn').onclick=()=>{say(w.word.toLowerCase());petReward('word',w.word)};
+  card.querySelector('.knownbtn').onclick=()=>{
+   const adding=!progress.known.includes(w.word);
+   if(!adding)progress.known=progress.known.filter(x=>x!==w.word);
+   else progress.known.push(w.word);
+   persist();if(adding)petReward('word',w.word);renderWords();
+  };
+  area.appendChild(card);
+ });
+ $('wordCount').textContent=count+' / '+visibleWords.length+'개';
+ $('wordMore').hidden=count>=visibleWords.length;
+}
 $('wordSearch').addEventListener('input',wordFilter);$('wordGroup').onchange=wordFilter;$('wordUnknown').onclick=()=>{unknownOnly=!unknownOnly;$('wordUnknown').textContent=unknownOnly?'전체 단어 보기':'모르는 단어만';wordFilter()};$('wordMore').onclick=()=>{pageWords++;renderWords()};
+$('wordVisual').onchange=renderWords;
 // Crossword: deterministic puzzle IDs, 20+ placed words required for a playable board.
 var PNUM=400,puzzle=null,selected=null;
 for(var n=1;n<=PNUM;n++)$('puzzleNumber').add(new Option('퍼즐 '+n,n));
