@@ -129,7 +129,25 @@ function beginGuided(t){g=createSession(t);stage('guidedBg','guidedIcon','guided
 $('guidedTopic').onchange=()=>beginGuided(chooseTopic('guidedTopic'));
 $('randomGuided').onclick=()=>{$('guidedTopic').value=D.TOPICS[Math.floor(Math.random()*D.TOPICS.length)].id;beginGuided(chooseTopic('guidedTopic'))};
 $('restartGuided').onclick=()=>beginGuided(chooseTopic('guidedTopic'));
-function guidedSend(){var text=$('guidedInput').value.trim();if(!text)return;g.history.push({role:'me',text});var result=markTurn(text);g.turn++;var next=nextTurn(g,text);g.history.push({role:'bot',text:next.text,ko:next.ko});renderChat('guidedHistory',g.history,g.translated);$('guidedProgress').textContent='대화 '+g.turn+'회 진행 · 자유롭게 계속 가능';$('guidedLevel').textContent='Lv.'+progress.level;$('guidedStatus').textContent=result.reason;$('guidedInput').value='';if(!g.glossVisible){}else renderGloss('guidedGlossBox',g.history.slice(-6).map(m=>m.text));say(next.text)}
+
+function guidedSend(){
+ const text=$('guidedInput').value.trim();if(!text)return;
+ const last=[...g.history].reverse().find(m=>m.role==='bot');
+ const sample=g.topic.turns[Math.min(g.turn,2)]?.sample||'';
+ const result=markTurn(text,last?.text||'',g.topic,sample);
+ g.history.push({role:'me',text});
+ showEvaluation('guidedEvaluation',result);
+ if(result.okay){
+   g.turn++;const next=nextTurn(g,text);g.history.push({role:'bot',text:next.text,ko:next.ko});
+   say(next.text);
+ }
+ renderChat('guidedHistory',g.history,g.translated);
+ $('guidedProgress').textContent='대화 '+g.turn+'회 진행 · 계속 대화 가능';
+ $('guidedLevel').textContent='Lv.'+progress.level;
+ $('guidedStatus').textContent=result.okay?'좋아요! 다음 대화로 이어갑니다.':'같은 질문을 다시 듣고 답해 보세요.';
+ $('guidedInput').value='';
+ if(g.glossVisible)renderGloss('guidedGlossBox',g.history.slice(-6).map(m=>m.text));
+}
 $('guidedSend').onclick=guidedSend;$('guidedInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();guidedSend()}});
 $('guidedTranslate').onclick=()=>{g.translated=!g.translated;renderChat('guidedHistory',g.history,g.translated);togglePressed($('guidedTranslate'),g.translated)};
 $('guidedGloss').onclick=()=>{g.glossVisible=!g.glossVisible;$('guidedGlossBox').hidden=!g.glossVisible;if(g.glossVisible)renderGloss('guidedGlossBox',g.history.slice(-6).map(m=>m.text));togglePressed($('guidedGloss'),g.glossVisible)};
@@ -144,7 +162,23 @@ $('freeReset').onclick=()=>beginFree(chooseTopic('freeTopic'));
 $('freeEndpoint').disabled=true;$('freeEndpoint').placeholder='0원 고정: 외부 유료 API 연결 차단';
 $('freeSaveEndpoint').disabled=true;$('freeSaveEndpoint').textContent='무료 기본 모드 사용';
 $('freeMode').textContent='월 0원 · 브라우저 대화 연습';
-function freeSend(){var text=$('freeInput').value.trim();if(!text)return;f.history.push({role:'me',text});var result=markTurn(text);f.turn++;var next=nextTurn(f,text);f.history.push({role:'bot',text:next.text,ko:next.ko});renderChat('freeHistory',f.history,f.translated);$('freeInput').value='';$('freeStatus').textContent='대화 '+f.turn+'회째 · '+result.reason;if(f.glossVisible)renderGloss('freeGlossBox',f.history.slice(-6).map(x=>x.text));say(next.text)}
+
+function freeSend(){
+ const text=$('freeInput').value.trim();if(!text)return;
+ const last=[...f.history].reverse().find(m=>m.role==='bot');
+ const sample=f.topic.turns[Math.min(f.turn,2)]?.sample||'';
+ const result=markTurn(text,last?.text||'',f.topic,sample);
+ f.history.push({role:'me',text});
+ showEvaluation('freeEvaluation',result);
+ if(result.okay){
+   f.turn++;const next=nextTurn(f,text);f.history.push({role:'bot',text:next.text,ko:next.ko});
+   say(next.text);
+ }
+ renderChat('freeHistory',f.history,f.translated);
+ $('freeInput').value='';
+ $('freeStatus').textContent='대화 '+f.turn+'회 · '+(result.okay?'다음 질문으로 이어갑니다.':'같은 질문을 다른 표현으로 답해 보세요.');
+ if(f.glossVisible)renderGloss('freeGlossBox',f.history.slice(-6).map(x=>x.text));
+}
 $('freeSend').onclick=freeSend;$('freeInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();freeSend()}});
 $('freeMic').onclick=()=>listenMic('freeInput','freeStatus');
 $('freeTranslate').onclick=()=>{f.translated=!f.translated;renderChat('freeHistory',f.history,f.translated);togglePressed($('freeTranslate'),f.translated)};
