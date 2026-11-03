@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>야나도 한다고 · English/Japanese Adventure v0.8</title><meta name="theme-color" content="#fff6df">
+<title>야나도 한다고 · English & Japanese Adventure v0.8</title><meta name="theme-color" content="#fff6df">
 <link rel="stylesheet" href="./style-v03.css"><link rel="stylesheet" href="./pet-v05.css?v=05"><link rel="stylesheet" href="./ui-v07.css?v=07"><link rel="stylesheet" href="./ja-ui-v08.css?v=08">
 <script>
 (function(){
@@ -62,6 +62,15 @@ function ready(){
    document.querySelector('#guidedInput').placeholder='일본어로 대답하세요. 예: はい、ホテルに行きます。';
    document.querySelector('#freeInput').placeholder='일본어로 자유롭게 이야기해 보세요.';
    document.querySelector('#guidedMic').title='일본어 음성 인식';
+   document.querySelector('.hero .hero-text .eyebrow').textContent='JAPANESE ADVENTURE';
+   document.querySelector('.tile.yellow small').textContent='아이콘·일본어 음성·뜻';
+   document.querySelector('#guided .stage-column .tiny').textContent='Chrome에 설치된 일본어 음성을 사용합니다. 실제 성우 녹음과는 다를 수 있습니다.';
+   document.querySelector('#quiz .section-title p').textContent='일본어 질문을 듣고 알맞은 일본어 대답을 고르세요.';
+   document.querySelector('#words .section-title p').textContent='히라가나·가타카나 단어와 한글 뜻, 일본어 발음을 익혀요.';
+   document.querySelector('#crossword .section-title p').textContent='일본어 글자를 채우는 가로세로 퍼즐입니다. 한 판에 20단어 이상입니다.';
+   document.querySelector('#free .notice').textContent='월 0원 무료 일본어 연속 회화 연습입니다. 실제 생성형 AI 서버는 아직 연결되지 않았습니다.';
+   document.querySelector('#petOnboard .pet-desc').textContent='영어나 일본어 중 무엇을 공부하든 먹이를 모아 펫을 성장시킬 수 있어요. 성체는 귀여운 애니메이션 스타일로 자라요.';
+   document.querySelector('.login-card > p').textContent='영어 또는 일본어로 즐기는 작은 학습 모험!';
  }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready);else ready();
@@ -150,5 +159,5 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </div>
 <script src="./content-v03.js"></script><script src="./expansion-v04.js"></script><script src="./word-visuals-v07.js?v=071"></script>
 <script src="./ja-dict-01.js?v=08"></script><script src="./ja-dict-02.js?v=08"></script><script src="./ja-dict-03.js?v=08"></script><script src="./ja-dict-04.js?v=08"></script><script src="./quiz-translations-v07.js?v=07"></script>
-<script src="./ja-conversation-01.js?v=08"></script><script src="./ja-conversation-02.js?v=08"></script><script src="./ja-conversation-03.js?v=08"></script><script src="./ja-catalog-v08.js?v=08"></script><script src="./ja-eval-v08.js?v=08"></script><script src="./conversation-eval-v07.js?v=072"></script><script src="./app-v07.js?v=08"></script><script src="./ja-app-v08.js?v=08"></script><script src="./pet-art-v05.js?v=05"></script><script src="./pet-v05.js?v=05"></script><script src="./backup-v06-ui.js?v=06"></script>
+<script src="./ja-conversation-01.js?v=08"></script><script src="./ja-conversation-02.js?v=08"></script><script src="./ja-conversation-03.js?v=08"></script><script src="./ja-catalog-v08.js?v=08"></script><script src="./ja-eval-v08.js?v=08"></script><script src="./conversation-eval-v07.js?v=072"></script><script src="./app-v07.js?v=08"></script><script src="./ja-app-v08.js?v=081"></script><script src="./pet-art-v05.js?v=05"></script><script src="./pet-v05.js?v=081"></script><script src="./backup-v06-ui.js?v=06"></script>
 </body></html>
