@@ -1,6 +1,7 @@
 
 (function(){
 'use strict';
+if(window.YANA_LANGUAGE==='ja')return;
 var D=window.YANA_DATA;
 if(!D){document.body.insertAdjacentHTML('beforeend','<p>학습 데이터를 불러오지 못했습니다. 새로고침해주세요.</p>');return;}
 var $=id=>document.getElementById(id);
@@ -44,7 +45,7 @@ function changeVoice(g){
 ['voiceGender','voiceGenderApp'].forEach(id=>{
  if($(id)){$(id).value=voiceGender;$(id).addEventListener('change',e=>changeVoice(e.target.value))}
 });
-if($('voicePreview'))$('voicePreview').addEventListener('click',()=>say("Hi there! I'm your friendly English speaking partner. Let's get started!"));
+// Initial-login preview is shared by English and Japanese through the login controller.
 
 function persist(){try{localStorage.setItem('yanado_v03',JSON.stringify(progress))}catch(e){}$('badgeLevel').textContent='대화 Lv.'+progress.level}
 function page(id){document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id===id));document.querySelectorAll('#topnav button').forEach(el=>el.classList.toggle('active',el.dataset.tab===id));if(id==='report')report();window.scrollTo({top:0,behavior:'smooth'})}
