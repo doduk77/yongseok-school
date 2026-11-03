@@ -1,0 +1,38 @@
+/* 야나도 한다고 v0.7: speech, translations, response feedback, differentiated vocabulary */
+.voice-login{background:#fff7e7;border:1px solid #f2e1bd;border-radius:16px;padding:12px;margin:12px 0;display:flex;flex-direction:column;gap:7px;text-align:left}
+.voice-login label{font-weight:800;font-size:14px}
+.voice-login select{border-radius:12px;border:1px solid #cce1dc;padding:11px;background:#fff;font-size:15px}
+.voice-login small{font-size:11px;line-height:1.45;color:#6f7d84}
+.voice-login .btn-soft{align-self:stretch}
+.meaning-eval{border:2px solid #e3e8df;border-radius:17px;margin:11px 0;padding:13px 16px;line-height:1.5;background:#f8f7f2;color:#2e4f59;box-shadow:0 3px 11px #6478751b}
+.meaning-eval.clear{background:#e8f9ee;border-color:#7ac39b;color:#246b45}
+.meaning-eval.unclear{background:#fff9e3;border-color:#e7c775;color:#785d25}
+.meaning-eval.offtopic{background:#fff0ed;border-color:#e6a9a1;color:#914a44}
+.meaning-eval strong{display:block;font-size:15px;margin-bottom:6px}
+.meaning-eval p{font-size:13px;margin:3px 0 7px;line-height:1.6}
+.meaning-eval small{display:block;font-size:12px;line-height:1.55}
+.meaning-eval .evaluation-note{font-size:10px;opacity:.78;margin-top:8px;border-top:1px dashed #a7bfbd;padding-top:6px}
+.quiz-tools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 15px}
+.quiz-tools button{font-size:12px;padding:8px 11px;min-height:37px}
+.quiz-tools button[aria-pressed=true],.quiz-mini-action[aria-pressed=true]{background:#d7f2e9;color:#176e63}
+.quiz-korean{background:#fff4d8;border:1px solid #efdcab;border-radius:12px;padding:9px 12px;color:#6a572c;margin:7px 0 12px;font-size:13px;line-height:1.5}
+.quiz-answers{display:flex;flex-direction:column;gap:10px}
+.quiz-answer-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:5px;align-items:start;border:1px solid #e0ebea;border-radius:17px;padding:6px;background:#fafdfe;min-width:0}
+.quiz-answer-row .option{width:100%;min-width:0;min-height:46px;overflow-wrap:anywhere;line-height:1.45;font-size:14px;margin:0}
+.quiz-mini-action{min-height:44px;padding:9px 10px;border-radius:12px;white-space:nowrap}
+.quiz-answer-ko{grid-column:1/-1;margin:0 4px 5px;text-align:left}
+.wordcard .wordicon{background:#fffdf6;border:1px solid #efeee5;width:72px;height:72px;border-radius:19px;display:grid;place-items:center;line-height:1;font-size:40px}
+.wordcard .wordmonogram{font-size:25px;font-weight:900;background:linear-gradient(140deg,#fff4d6,#ecf6fa);color:#53848b;letter-spacing:1px}
+.wordcard:has(.wordmonogram){background:linear-gradient(140deg,#f5faf9,#fffbef)}
+.wordcard .meaning{line-height:1.35}
+@media(max-width:600px){
+.meaning-eval{padding:12px}
+.quiz-tools{gap:6px}
+.quiz-tools button{flex:1;min-width:95px;font-size:11px}
+.quiz-answer-row{grid-template-columns:minmax(0,1fr) 43px 43px;padding:5px;gap:4px}
+.quiz-answer-row .option{font-size:12px;padding:9px 7px;gap:6px;min-height:43px}
+.quiz-mini-action{padding:7px;min-height:42px}
+.wordcard .wordicon{width:60px;height:60px;font-size:34px}
+.wordcard .wordmonogram{font-size:21px}
+.voice-login{padding:9px}
+}
