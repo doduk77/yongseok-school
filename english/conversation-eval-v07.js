@@ -42,7 +42,8 @@ function evaluate({question,answer,sample,topic}={}){
  const sampleCore=new Set(sampleTokens.filter(x=>x.length>3&&!['please','would','could','should','have','this','that','there','with','your','from'].includes(x)));
  const sampleMatch=tokens.some(x=>sampleCore.has(x));
  if(sampleMatch)successful=true;
- if(!matched.length && (commonNouns.length>0 || (meaningfulExtra && sharedTheme)))successful=true;
+ if(!matched.length && commonNouns.length>0)successful=true;
+ if(/\b(reservation|reserved|booking)\b/.test(q) && /\b(booked|booking|reserved|reservation)\b/.test(a))successful=true;
  if(successful)return {kind:'clear',accepted:true,title:'🟢 뜻이 통할 가능성 높음',detail:'질문과 관련된 정보를 찾았습니다. 시제·문법이 조금 틀려도 대화를 이어갈 수 있어 보여요.',example:sample||'',disclaimer:label};
  const badKnown=negative.test(a);
  const contextMismatch= matched.length>0 && tokens.length>=3 && !successful && (badKnown || /\b(i like|i love|i watched|i played|i work|i ate|i am|i'm|the|my)\b/.test(a));
