@@ -29,9 +29,10 @@ function evaluate({question,answer,sample,topic}={}){
  const yesNo=/^(are|is|do|does|did|have|has|can|could|would|will|should|may|were|was)\b/.test(q)||/\b(do you|does it|are you|is there|have you|would you|can you|could you|will you|did you|should we)\b/.test(q);
  const wh=/^(what|where|when|why|who|which|how)\b/.test(q);
  const politeResponse=polite.test(a) && tokens.length<=3;
- if(yesNo && genericAgreement.test(a))return {kind:'clear',accepted:true,title:'🟢 뜻이 통할 가능성 높음',detail:'예/아니요 또는 동의 의사가 질문에 맞게 전달됩니다. 문법은 별도로 익혀도 괜찮아요.',example:sample||'',disclaimer:label};
  if(wh && genericAgreement.test(a)&&tokens.length<=3)return {kind:'unclear',accepted:false,title:'🟠 다시 확인하면 좋음',detail:'이 질문은 장소·시간·내용 등의 정보가 필요합니다. Yes/No만으로는 부족할 수 있어요.',example:sample||'',disclaimer:label};
- if(a.length<2)return {kind:'unclear',accepted:false,title:'🟠 다시 확인하면 좋음',detail:'짧은 답변입니다. 한 단어를 더 덧붙여 주세요.',example:sample||'',disclaimer:label};
+
+ if(yesNo && genericAgreement.test(a))return {kind:'clear',accepted:true,title:'🟢 뜻이 통할 가능성 높음',detail:'예/아니요 또는 동의 의사가 질문에 맞게 전달됩니다. 문법은 별도로 익혀도 괜찮아요.',example:sample||'',disclaimer:label};
+  if(a.length<2)return {kind:'unclear',accepted:false,title:'🟠 다시 확인하면 좋음',detail:'짧은 답변입니다. 한 단어를 더 덧붙여 주세요.',example:sample||'',disclaimer:label};
  const matched=domains.filter(d=>d.q.test(q));
  let successful=matched.some(d=>d.r.test(a));
  const meaningfulExtra=/\b(i|i'm|i've|i'd|we|we're|my|our|want|need|would|because|but|and|please|can|could|what|where|when|how|why)\b/.test(a);
