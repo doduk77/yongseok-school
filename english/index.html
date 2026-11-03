@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>야나도 한다고 · English Adventure v0.5</title><meta name="theme-color" content="#fff6df">
+<title>야나도 한다고 · English Adventure v0.6</title><meta name="theme-color" content="#fff6df">
 <link rel="stylesheet" href="./style-v03.css"><link rel="stylesheet" href="./pet-v05.css?v=05">
 <script>
 (function(){function ready(){var pin=document.getElementById('password'),gate=document.getElementById('gate'),app=document.getElementById('app'),error=document.getElementById('loginError');function unlock(){if(pin.value.trim()!=='2580'){error.textContent='비밀번호가 틀렸습니다.';return;}try{sessionStorage.setItem('yanado_session','1')}catch(e){}gate.hidden=true;app.hidden=false;pin.value='';error.textContent='';window.dispatchEvent(new Event('yanado:unlock'));}document.getElementById('loginBtn').addEventListener('click',unlock);pin.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();unlock()}});document.getElementById('lockBtn').addEventListener('click',function(){try{sessionStorage.removeItem('yanado_session')}catch(e){}app.hidden=true;gate.hidden=false;});try{if(sessionStorage.getItem('yanado_session')==='1'){gate.hidden=true;app.hidden=false}}catch(e){}}document.addEventListener('DOMContentLoaded',ready)})();
@@ -74,5 +74,5 @@
     <p class="tiny">선택한 펫과 학습 기록은 현재 브라우저에 저장됩니다. 다른 기기에는 자동 동기화되지 않습니다.</p>
   </div>
 </div>
-<script src="./content-v03.js"></script><script src="./expansion-v04.js"></script><script src="./app-v03.js?v=05"></script><script src="./pet-art-v05.js?v=05"></script><script src="./pet-v05.js?v=05"></script>
+<script src="./content-v03.js"></script><script src="./expansion-v04.js"></script><script src="./app-v03.js?v=05"></script><script src="./pet-art-v05.js?v=05"></script><script src="./pet-v05.js?v=05"></script><script src="./backup-v06-ui.js?v=06"></script>
 </body></html>
