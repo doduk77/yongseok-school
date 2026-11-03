@@ -186,7 +186,60 @@ $('freeGloss').onclick=()=>{f.glossVisible=!f.glossVisible;$('freeGlossBox').hid
 $('freeReplay').onclick=()=>{var last=[...f.history].reverse().find(m=>m.role==='bot');if(last)say(last.text)};
 // Quiz modes: each combination of theme, 3 utterances and 24 setting permutations is selectable.
 var quizSeed=0,currentQuiz=null;
-function makeQuiz(){var t=$('quizTopic').value==='all'?D.TOPICS[Math.floor(Math.random()*D.TOPICS.length)]:chooseTopic('quizTopic');var itemIndex=(quizSeed+Math.floor(Math.random()*3))%3;var item=t.turns[itemIndex];var variant=D.VARIANTS[(quizSeed+Math.floor(Math.random()*D.VARIANTS.length))%D.VARIANTS.length];var other=D.TOPICS.filter(x=>x.id!==t.id);var d1=other[(quizSeed*7+3)%other.length].turns[(itemIndex+1)%3].sample;var d2=other[(quizSeed*11+9)%other.length].turns[(itemIndex+2)%3].sample;var answers=[item.sample,d1,d2];if(new Set(answers).size<3){answers[1]='I have no idea about your question.';answers[2]='This is a beautiful purple moon.'}var correct=answers[0];answers=answers.map((a,i)=>({a,correct:i===0})).sort(()=>Math.random()-.5);currentQuiz={t,item,variant,answers,done:false,petId:t.id+'|'+itemIndex+'|'+variant.time+'|'+variant.company+'|'+variant.mood};$('quizContext').textContent=t.name+' · '+variant.time+' · '+variant.company;$('quizQuestion').textContent=item.en;$('quizEmoji').textContent=t.icon;stage('quizBg','quizEmoji','quizScene',t,'quizContext');$('quizContext').textContent=t.name+' · '+variant.time+' · '+variant.company;$('quizFeedback').hidden=true;$('quizAnswers').innerHTML='';answers.forEach((x,i)=>{var b=document.createElement('button');b.className='option';b.innerHTML='<span class="letter">'+String.fromCharCode(65+i)+'</span>'+esc(x.a);b.onclick=()=>{if(currentQuiz.done)return;currentQuiz.done=true;progress.quizzes++;if(x.correct)progress.quizCorrect++;persist();petReward('quiz',currentQuiz.petId,x.correct);document.querySelectorAll('#quizAnswers button').forEach((button,k)=>button.classList.toggle(answers[k].correct?'correct':k===i?'wrong':'unused',true));$('quizFeedback').hidden=false;$('quizFeedback').textContent=x.correct?'✅ 자연스러운 대답입니다. '+item.ko:'💡 이 상황에서는 "'+correct+'"처럼 대답할 수 있습니다. '+item.ko};$('quizAnswers').appendChild(b)});$('quizProgress').textContent='문제 '+(quizSeed+1)+' · 테마별 변형'}
+
+function makeQuiz(){
+ const t=$('quizTopic').value==='all'?D.TOPICS[Math.floor(Math.random()*D.TOPICS.length)]:chooseTopic('quizTopic');
+ const itemIndex=(quizSeed+Math.floor(Math.random()*3))%3;
+ const item=t.turns[itemIndex];
+ const variant=D.VARIANTS[(quizSeed+Math.floor(Math.random()*D.VARIANTS.length))%D.VARIANTS.length];
+ const other=D.TOPICS.filter(x=>x.id!==t.id);
+ let distractor1=other[(quizSeed*7+3)%other.length].turns[(itemIndex+1)%3].sample;
+ let distractor2=other[(quizSeed*11+9)%other.length].turns[(itemIndex+2)%3].sample;
+ let answers=[item.sample,distractor1,distractor2];
+ if(new Set(answers).size<3)answers=[item.sample,'I went to school yesterday.','The weather is very cold today.'];
+ answers=answers.map((a,i)=>({a,correct:i===0,ko:D.QUIZ_KO?.get(a)||'번역이 등록되지 않았습니다. 단어 뜻 버튼으로 확인해 주세요.'})).sort(()=>Math.random()-.5);
+ currentQuiz={t,item,variant,answers,done:false,petId:t.id+'|'+itemIndex+'|'+variant.time+'|'+variant.company+'|'+variant.mood};
+ $('quizQuestion').textContent=item.en;
+ $('quizQuestionKo').textContent=item.ko;
+ $('quizQuestionKo').hidden=true;
+ $('quizTranslateQuestion').setAttribute('aria-pressed','false');
+ $('quizWordPanel').hidden=true;
+ $('quizWords').setAttribute('aria-pressed','false');
+ $('quizEmoji').textContent=t.icon;
+ stage('quizBg','quizEmoji','quizScene',t,'quizContext');
+ $('quizContext').textContent=t.name+' · '+variant.time+' · '+variant.company;
+ $('quizFeedback').hidden=true;
+ const area=$('quizAnswers');area.innerHTML='';
+ answers.forEach((x,i)=>{
+   const row=document.createElement('div');row.className='quiz-answer-row';
+   const b=document.createElement('button');b.type='button';b.className='option quiz-answer-choice';
+   b.innerHTML='<span class="letter">'+String.fromCharCode(65+i)+'</span>'+esc(x.a);
+   b.onclick=()=>{
+     if(currentQuiz.done)return;
+     currentQuiz.done=true;progress.quizzes++;if(x.correct)progress.quizCorrect++;persist();
+     petReward('quiz',currentQuiz.petId,x.correct);
+     document.querySelectorAll('#quizAnswers .quiz-answer-choice').forEach((node,k)=>node.classList.toggle(answers[k].correct?'correct':k===i?'wrong':'unused',true));
+     $('quizFeedback').hidden=false;
+     $('quizFeedback').textContent=x.correct?'✅ 자연스러운 대답입니다. '+item.ko:'💡 이 상황에서는 "'+item.sample+'"처럼 대답할 수 있습니다. '+item.ko;
+   };
+   const listen=document.createElement('button');listen.className='btn-soft quiz-mini-action';listen.type='button';listen.textContent='🔊';listen.title='답 '+String.fromCharCode(65+i)+' 듣기';listen.setAttribute('aria-label',listen.title);listen.onclick=()=>say(x.a);
+   const tr=document.createElement('button');tr.className='btn-soft quiz-mini-action';tr.type='button';tr.textContent='🇰🇷';tr.title='답 '+String.fromCharCode(65+i)+' 번역';tr.setAttribute('aria-label',tr.title);
+   const ko=document.createElement('p');ko.className='quiz-korean quiz-answer-ko';ko.hidden=true;ko.textContent=x.ko;
+   tr.onclick=()=>{ko.hidden=!ko.hidden;tr.setAttribute('aria-pressed',String(!ko.hidden))};
+   row.append(b,listen,tr,ko);area.appendChild(row);
+ });
+ $('quizProgress').textContent='문제 '+(quizSeed+1)+' · 테마별 변형';
+}
+$('quizSpeakQuestion').onclick=()=>{if(currentQuiz)say(currentQuiz.item.en)};
+$('quizTranslateQuestion').onclick=()=>{
+ const p=$('quizQuestionKo');p.hidden=!p.hidden;
+ $('quizTranslateQuestion').setAttribute('aria-pressed',String(!p.hidden));
+};
+$('quizWords').onclick=()=>{
+ const p=$('quizWordPanel');p.hidden=!p.hidden;
+ $('quizWords').setAttribute('aria-pressed',String(!p.hidden));
+ if(!p.hidden && currentQuiz)renderGloss('quizWordPanel',[currentQuiz.item.en,...currentQuiz.answers.map(x=>x.a)]);
+};
 $('quizNext').onclick=()=>{quizSeed++;makeQuiz()};$('quizTopic').onchange=()=>{quizSeed++;makeQuiz()};
 // Vocabulary
 var pageWords=0,unknownOnly=false,visibleWords=[];
