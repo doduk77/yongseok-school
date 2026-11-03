@@ -22,8 +22,9 @@ function classify({question='',answer='',sample='',topic=null}={}){
  if(!wh&&yesOnly)return result('clear',true,'🟢 의도가 전달될 가능성이 높음','긍정·부정 또는 정중한 의사가 전달됩니다.');
  let relevant=false;
  for(const [qPattern,aPattern] of PAIRS)if(qPattern.test(q)&&aPattern.test(a)){relevant=true;break}
- if(!relevant && s.length>=2 && a.length>=2){
-   const ngrams=new Set();for(let i=0;i+2<=s.length;i++){const part=s.slice(i,i+2);if(!/^(はい|です|ます|ませ|して|くだ|お願|いい|くだ)$/u.test(part))ngrams.add(part)}
+ if(!relevant && /ぞう|ゾウ|宇宙|うちゅう|ペンギン|ダンス|恐竜|きょうりゅう/.test(a) && !/ぞう|ゾウ|宇宙|うちゅう|ペンギン|ダンス|恐竜|きょうりゅう/.test(q))return result('offtopic',false,'🔴 질문과 관련이 낮아 보여요','질문 주제와 관계없는 내용입니다.');
+ if(!relevant && s.length>=3 && a.length>=3){
+   const ngrams=new Set();for(let i=0;i+3<=s.length;i++){const part=s.slice(i,i+3);if(!/^(してい|ていま|います|します|したい|たいで|いです|ですか|ました|くださ|ません|お願い|いまし|りまし|よろし|そうで)$/u.test(part))ngrams.add(part)}
    relevant=[...ngrams].some(part=>a.includes(part));
  }
  if(!relevant && question.includes('？')&&/はい|いいえ|ください|お願いします/.test(a)&&a.length>=5)relevant=true;
