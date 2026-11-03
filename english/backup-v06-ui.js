@@ -1,12 +1,12 @@
 /* 야나도 한다고 v0.6 - automatic local save + backup/restore, no numbered login */
 (function () {
  'use strict';
- const LEARN='yanado_v03', PET='yanado_pet_v05', CHECKPOINT='yanado_checkpoint_v06', STAMP='yanado_last_backup_v06';
+ const LEARN='yanado_v03', JAPANESE='yanado_ja_v08', PET='yanado_pet_v05', CHECKPOINT='yanado_checkpoint_v06', STAMP='yanado_last_backup_v06';
  const $=id=>document.getElementById(id);
  let lastSignature='';
  function get(key){try{const t=localStorage.getItem(key);return t?JSON.parse(t):null}catch(e){return null}}
  function put(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(e){return false}}
- function snapshot(){return {learning:get(LEARN),pet:get(PET)}}
+ function snapshot(){return {learning:get(LEARN),japanese:get(JAPANESE),pet:get(PET)}}
  function validPet(p){
   if(p===null)return true;
   if(!p||typeof p!=='object'||Array.isArray(p))return false;
@@ -21,7 +21,7 @@
   if(p.known!==undefined && (!Array.isArray(p.known)||p.known.length>5000||p.known.some(x=>typeof x!=='string'||x.length>90)))return false;
   return true;
  }
- function validData(p){return p && (p.learning!==null||p.pet!==null) && validPet(p.pet??null)&&validLearning(p.learning??null)}
+ function validData(p){return p && (p.learning!=null||p.japanese!=null||p.pet!=null) && validPet(p.pet??null)&&validLearning(p.learning??null)&&validLearning(p.japanese??null)}
  function notify(text,warning){const e=$('backupStatus');if(e){e.textContent=text;e.style.color=warning?'#b65459':'#246f65'}}
  function stamp(){
   let time='';try{time=localStorage.getItem(STAMP)||''}catch(e){}
@@ -49,15 +49,17 @@
    stamp();notify('백업 파일 다운로드를 요청했습니다. 파일 앱 또는 다운로드 폴더에서 실제 저장 여부를 확인하세요.');
  }
  function apply(state){
-   const previous={learning:localStorage.getItem(LEARN),pet:localStorage.getItem(PET)};
+   const previous={learning:localStorage.getItem(LEARN),japanese:localStorage.getItem(JAPANESE),pet:localStorage.getItem(PET)};
    try{
      if(!put('yanado_before_restore_v06',previous))throw Error('기존 데이터 임시 백업 실패');
      if(state.learning===null)localStorage.removeItem(LEARN);else if(!put(LEARN,state.learning))throw Error('학습 기록 저장 실패');
      if(state.pet===null)localStorage.removeItem(PET);else if(!put(PET,state.pet))throw Error('펫 기록 저장 실패');
+     if(state.japanese===null)localStorage.removeItem(JAPANESE);else if(state.japanese!==undefined&&!put(JAPANESE,state.japanese))throw Error('일본어 기록 저장 실패');
      lastSignature='';checkpoint();
    }catch(err){
      if(previous.learning===null)localStorage.removeItem(LEARN);else localStorage.setItem(LEARN,previous.learning);
      if(previous.pet===null)localStorage.removeItem(PET);else localStorage.setItem(PET,previous.pet);
+     if(previous.japanese===null)localStorage.removeItem(JAPANESE);else localStorage.setItem(JAPANESE,previous.japanese);
      throw err;
    }
  }
@@ -66,7 +68,7 @@
    if(file.size>2*1024*1024)throw Error('파일 크기는 2MB 이하여야 합니다.');
    let v;try{v=JSON.parse(await file.text())}catch(e){throw Error('백업 파일을 읽지 못했습니다.')}
    if(!v||v.format!=='yanado-study-pet-backup'||v.version!==1)throw Error('프로그램 백업 파일 형식이 아닙니다.');
-   const state={learning:v.learning??null,pet:v.pet??null};
+   const state={learning:v.learning??null,japanese:Object.prototype.hasOwnProperty.call(v,'japanese')?v.japanese:get(JAPANESE),pet:v.pet??null};
    if(!validData(state))throw Error('학습/펫 데이터가 올바르지 않습니다.');
    const name=state.pet?state.pet.name:'펫 없음';
    if(!confirm('현재 이 브라우저의 학습 기록과 펫 기록을 파일 내용으로 바꿀까요?\n\n백업 날짜: '+String(v.created||'알 수 없음').slice(0,30)+'\n펫: '+String(name).slice(0,40)+'\n\n중요: 현재 기록은 먼저 파일로 백업하는 것이 안전합니다.'))return;
