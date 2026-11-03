@@ -147,9 +147,9 @@ function guidedSend(){
 $('guidedSend').onclick=guidedSend;$('guidedInput').addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();guidedSend()}});
 $('guidedTranslate').onclick=()=>{g.translated=!g.translated;renderChat('guidedHistory',g.history,g.translated);togglePressed($('guidedTranslate'),g.translated)};
 $('guidedGloss').onclick=()=>{g.glossVisible=!g.glossVisible;$('guidedGlossBox').hidden=!g.glossVisible;if(g.glossVisible)renderGloss('guidedGlossBox',g.history.slice(-6).map(m=>m.text));togglePressed($('guidedGloss'),g.glossVisible)};
-$('guidedTip').onclick=()=>{var el=$('guidedTipBox');el.hidden=!el.hidden;if(!el.hidden){var recent=g.history.filter(x=>x.role==='me').slice(-1)[0];var text=recent?recent.text:'';el.textContent=/\byesterday\b/i.test(text)?'💡 일본어는 과거의 동작에 〜ました를 자주 씁니다. 예: 昨日ホテルに行きました。':/\b(now|right now)\b/i.test(text)?'💡 진행 중인 동작은 〜ています를 자주 씁니다. 예: 今、待っています。':'💡 일본어는 현재·미래를 같은 기본형으로 말하기도 합니다. 明日・来週 같은 시간 표현을 함께 사용하세요.'}};
+$('guidedTip').onclick=()=>{var el=$('guidedTipBox');el.hidden=!el.hidden;if(!el.hidden){var recent=g.history.filter(x=>x.role==='me').slice(-1)[0];var text=recent?recent.text:'';el.textContent=/昨日|きのう/.test(text)?'💡 일본어는 과거의 동작에 〜ました를 자주 씁니다. 예: 昨日ホテルに行きました。':/今|いま/.test(text)?'💡 진행 중인 동작은 〜ています를 자주 씁니다. 예: 今、待っています。':'💡 일본어는 현재·미래를 같은 기본형으로 말하기도 합니다. 明日・来週 같은 시간 표현을 함께 사용하세요.'}};
 $('guidedReplay').onclick=()=>{var last=[...g.history].reverse().find(m=>m.role==='bot');if(last)say(last.text)};
-function listenMic(id,status){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$(status).textContent='이 브라우저에서 음성 인식이 지원되지 않습니다. 텍스트로 입력할 수 있습니다.';return}var r=new SR();r.lang='ja-JP';r.interimResults=false;r.maxAlternatives=1;r.onresult=e=>{$(id).value=e.results[0][0].transcript;$(status).textContent='음성을 받아 적었습니다. 확인 후 보내주세요.'};r.onerror=e=>$(status).textContent='마이크 오류: '+e.error+'. 텍스트로 입력하세요.';try{r.start();$(status).textContent='🎤 영어를 듣고 있습니다...'}catch(e){$(status).textContent='마이크 사용에 실패했습니다.'}}
+function listenMic(id,status){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$(status).textContent='이 브라우저에서 음성 인식이 지원되지 않습니다. 텍스트로 입력할 수 있습니다.';return}var r=new SR();r.lang='ja-JP';r.interimResults=false;r.maxAlternatives=1;r.onresult=e=>{$(id).value=e.results[0][0].transcript;$(status).textContent='음성을 받아 적었습니다. 확인 후 보내주세요.'};r.onerror=e=>$(status).textContent='마이크 오류: '+e.error+'. 텍스트로 입력하세요.';try{r.start();$(status).textContent='🎤 일본어를 듣고 있습니다...'}catch(e){$(status).textContent='마이크 사용에 실패했습니다.'}}
 $('guidedMic').onclick=()=>listenMic('guidedInput','guidedStatus');
 function beginFree(t){f=createSession(t);stage('freeBg','freeIcon','freeStage',t,'freeScenario');f.history.push({role:'bot',text:'こんにちは。今日は「'+t.name+'」について話しましょう。 '+t.turns[0].en,ko:'안녕하세요! 상황에 맞춰 대화해 봐요. '+t.turns[0].ko});renderChat('freeHistory',f.history,false);$('freeInput').value='';$('freeStatus').textContent='서버 없는 무료 연습 모드입니다. 추가 정보가 있으면 관련 질문을 이어갑니다.';$('freeGlossBox').hidden=true;togglePressed($('freeTranslate'),false);togglePressed($('freeGloss'),false)}
 $('freeTopic').onchange=()=>beginFree(chooseTopic('freeTopic'));
@@ -337,7 +337,37 @@ var puzzleId=($('puzzleDifficulty')?.value||'medium')+'|'+String($('puzzleNumber
 puzzle.placed.forEach(w=>{var solved=[...w.word].every((char,i)=>{var el=focusCell(w,i);return !!el&&el.value.trim().normalize('NFKC')===char});if(solved)petReward('crossword',puzzleId+'|'+w.word+'|'+w.dir+'|'+w.row+'|'+w.col)});
 if(ok===all&&all>0)petReward('crosswordComplete',puzzleId);
 $('puzzleMessage').textContent='맞힌 칸 '+ok+' / '+all+' · '+(ok===all?'축하합니다!':'정답이 아닌 칸을 다시 확인해 보세요.')};
-function report(){var items=[['총 대화',progress.turns+'회'],['응답 연습',progress.attempts+'회'],['대화 응답률 (휴리스틱)',progress.attempts?Math.round(progress.understood/progress.attempts*100)+'%':'—'],['대화 퀴즈',progress.quizzes?Math.round(progress.quizCorrect/progress.quizzes*100)+'%':'—'],['기억한 단어',progress.known.length+'개'],['학습 난이도','Lv.'+progress.level]];$('reportStats').innerHTML=items.map(x=>'<div class="stat"><strong>'+esc(x[1])+'</strong><span>'+esc(x[0])+'</span></div>').join('');$('reportDetails').innerHTML='<h3>현재 난이도 Lv.'+progress.level+' / 8</h3><div class="progressbar"><span style="width:'+(progress.level/8*100)+'%"></span></div><p>지금 버전은 긴 답변과 의미 관련 단서 등을 활용하는 <b>연습용 규칙 기반 수준</b>입니다. 실제 미국인 화자의 의사 이해도를 판정하거나 CEFR 등급을 인증하지 않습니다.</p><p>무료 모델이나 정식 AI 서버를 연결하면 추가 발언에 대한 의미 이해와 문법 팁의 정확도를 높일 수 있습니다. 현재 연결된 외부 과금 API는 없습니다.</p>'}
+function report(){var items=[['총 대화',progress.turns+'회'],['응답 연습',progress.attempts+'회'],['대화 응답률 (휴리스틱)',progress.attempts?Math.round(progress.understood/progress.attempts*100)+'%':'—'],['대화 퀴즈',progress.quizzes?Math.round(progress.quizCorrect/progress.quizzes*100)+'%':'—'],['기억한 단어',progress.known.length+'개'],['학습 난이도','Lv.'+progress.level]];$('reportStats').innerHTML=items.map(x=>'<div class="stat"><strong>'+esc(x[1])+'</strong><span>'+esc(x[0])+'</span></div>').join('');$('reportDetails').innerHTML='<h3>현재 난이도 Lv.'+progress.level+' / 8</h3><div class="progressbar"><span style="width:'+(progress.level/8*100)+'%"></span></div><p>지금 버전은 긴 답변과 의미 관련 단서 등을 활용하는 <b>연습용 규칙 기반 수준</b>입니다. 실제 일본인 화자의 이해도를 정확히 판단하거나 공인 일본어 능력시험 등급을 인증하지 않습니다.</p><p>일본어 문맥 이해와 문법 교정은 현재 규칙 기반입니다. 실제 의미 기반 AI 연동은 추후 필요합니다. 현재 연결된 외부 과금 API는 없습니다.</p>'}
 $('clearProgress').onclick=()=>{if(confirm('이 기기의 학습 기록을 초기화할까요?')){progress=Object.assign({},DEFAULT);persist();report();wordFilter()}};
 beginGuided(D.TOPICS[0]);beginFree(D.TOPICS[0]);makeQuiz();wordFilter();renderPuzzle(1);persist();
+(function addJapaneseKanaPad(){
+ const parent=$('puzzleViewport')?.parentElement;if(!parent)return;
+ const area=document.createElement('section');area.id='japaneseKanaPad';area.className='ja-kana-panel';
+ const title=document.createElement('p');title.className='tiny';title.textContent='🇯🇵 일본어 글자 패드 · 단어를 선택한 후 글자를 누르면 다음 칸으로 이동해요.';area.appendChild(title);
+ const nav=document.createElement('div');nav.className='ja-kana-nav';area.appendChild(nav);
+ let mode='hira';
+ const keypad=document.createElement('div');keypad.className='ja-kana-grid';
+ function transform(ch){return mode==='kata'&&/[ぁ-ゖ]/u.test(ch)?String.fromCharCode(ch.charCodeAt(0)+0x60):ch}
+ function makeKeys(){
+  keypad.innerHTML='';
+  const letters=Array.from('あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉゃゅょっー');
+  for(const base of letters){
+   const b=document.createElement('button');b.className='ja-kana-key';b.type='button';b.textContent=transform(base);
+   b.addEventListener('click',()=>{
+      const active=document.activeElement,all=selected?[...selected.word].map((_,i)=>focusCell(selected,i)):[],
+            field=(all.includes(active)?active:all.find(x=>x&&!x.value))||all[0];
+      if(!field)return;
+      const targetScript=/[ァ-ヿ]/u.test(selected.word)?'kata':'hira';
+      const ch=targetScript==='kata'&&/[ぁ-ゖ]/u.test(base)?String.fromCharCode(base.charCodeAt(0)+0x60):base;
+      field.value=ch;field.dispatchEvent(new Event('input',{bubbles:true}));
+   });keypad.appendChild(b);
+  }
+ }
+ for(const [label,v] of [['ひらがな','hira'],['カタカナ','kata']]){
+  const b=document.createElement('button');b.type='button';b.className='btn-soft small';b.textContent=label;
+  b.onclick=()=>{mode=v;makeKeys()};nav.appendChild(b);
+ }
+ area.appendChild(keypad);parent.appendChild(area);makeKeys();
+})();
+
 })();
