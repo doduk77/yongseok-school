@@ -13,3 +13,12 @@ body:has(#app:not([hidden])) .topnav{scroll-padding:18px}
 #puzzleGrid .crosscell input[lang="ja"]{font-size:17px}
 #wordGrid .wordcard strong{font-size:12px;line-height:1.35}
 }
+
+.ja-kana-panel{background:#fffdf5;border:2px solid #e3eee8;border-radius:16px;margin:13px 0;padding:10px}
+.ja-kana-panel .tiny{margin:0 0 8px}
+.ja-kana-nav{display:flex;gap:6px;justify-content:flex-end;margin:6px 0 10px}
+.ja-kana-grid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px;max-height:245px;overflow:auto;padding:4px}
+.ja-kana-key{border-radius:8px;border:1px solid #c2dfd6;background:#ecf8f2;color:#235f5d;font-size:17px;font-weight:800;min-height:35px;padding:0;touch-action:manipulation}
+.ja-kana-key:hover,.ja-kana-key:focus-visible{background:#d5f2dd}
+@media(max-width:700px){.ja-kana-grid{grid-template-columns:repeat(8,minmax(0,1fr))}.ja-kana-key{font-size:16px;min-height:37px}}
+@media(max-width:420px){.ja-kana-grid{grid-template-columns:repeat(7,minmax(0,1fr))}.ja-kana-panel{padding:7px}.ja-kana-key{font-size:16px}}
