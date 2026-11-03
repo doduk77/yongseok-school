@@ -1,0 +1,15 @@
+/* Shared English/Japanese login selector and Japanese text rendering, v0.8 */
+.course-select{width:100%;margin:6px 0 10px;border:2px solid #cde4da;border-radius:15px;padding:13px 14px;background:#fff;color:#274458;font-weight:800;font-size:16px}
+#courseLabel{text-align:left;margin:0 0 12px;color:#50817e;font-size:12px}
+.voice-login select{width:100%}
+.login-card label{margin-top:7px}
+.login-card .voice-login label{margin-top:0}
+body:has(#app:not([hidden])) .topnav{scroll-padding:18px}
+#puzzleGrid .crosscell input[lang="ja"]{font-size:clamp(16px,2vw,20px);font-family:system-ui,"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;ime-mode:active}
+#wordGrid .wordcard strong{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",system-ui,sans-serif;word-break:break-all}
+#guidedHistory .eng,#freeHistory .eng,#quizQuestion,#quizAnswers .option{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",system-ui,sans-serif;line-height:1.75}
+@media(max-width:600px){
+.course-select{font-size:15px}
+#puzzleGrid .crosscell input[lang="ja"]{font-size:17px}
+#wordGrid .wordcard strong{font-size:12px;line-height:1.35}
+}
