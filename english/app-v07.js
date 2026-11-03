@@ -196,7 +196,14 @@ function makeQuiz(){
  let distractor1=other[(quizSeed*7+3)%other.length].turns[(itemIndex+1)%3].sample;
  let distractor2=other[(quizSeed*11+9)%other.length].turns[(itemIndex+2)%3].sample;
  let answers=[item.sample,distractor1,distractor2];
- if(new Set(answers).size<3)answers=[item.sample,'I went to school yesterday.','The weather is very cold today.'];
+ if(new Set(answers).size<3){
+   const choices=[...new Set(D.TOPICS.flatMap(x=>x.turns.map(y=>y.sample)))];
+   answers=[item.sample];
+   for(let j=0;j<choices.length && answers.length<3;j++){
+     const candidate=choices[(j+quizSeed*13)%choices.length];
+     if(!answers.includes(candidate))answers.push(candidate);
+   }
+ }
  answers=answers.map((a,i)=>({a,correct:i===0,ko:D.QUIZ_KO?.get(a)||'번역이 등록되지 않았습니다. 단어 뜻 버튼으로 확인해 주세요.'})).sort(()=>Math.random()-.5);
  currentQuiz={t,item,variant,answers,done:false,petId:t.id+'|'+itemIndex+'|'+variant.time+'|'+variant.company+'|'+variant.mood};
  $('quizQuestion').textContent=item.en;
