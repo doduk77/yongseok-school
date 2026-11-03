@@ -102,7 +102,7 @@
       ['💬','대화',data.tally.talk+'회'],['❓','퀴즈',data.tally.quiz+'문제'],
       ['📖','단어',data.tally.word+'개'],['🧩','퍼즐 단어',data.tally.crossword+'개']
     ].map(v=>'<div class="pet-stat"><span>'+v[0]+'</span><strong>'+v[2]+'</strong><small>'+v[1]+'</small></div>').join('');
-    if($('petFeedLog'))$('petFeedLog').innerHTML=data.log.slice().reverse().slice(0,6).map(x=>'<li>'+safe(x)+'</li>').join('') || '<li>영어 공부를 시작하면 여기에 기록이 쌓여요.</li>';
+    if($('petFeedLog'))$('petFeedLog').innerHTML=data.log.slice().reverse().slice(0,6).map(x=>'<li>'+safe(x)+'</li>').join('') || '<li>언어 공부를 시작하면 여기에 기록이 쌓여요.</li>';
     const preview=$('petHomePreview');
     if(preview)preview.innerHTML='<span class="preview-pet">'+(index===0?'🥚':artOf(a))+'</span><div><b>'+safe(data.name)+' · '+safe(st.name)+'</b><small>🍎 먹이 '+data.food+'개 · 총 먹이주기 '+data.fed+'회</small></div><button type="button" class="btn-main" id="openMyPet">펫에게 밥 주기 →</button>';
     $('openMyPet')?.addEventListener('click',()=>document.querySelector('[data-tab="pet"]')?.click());
@@ -131,7 +131,7 @@
     const name=($('petNameInput')?.value||'').trim().slice(0,18)||'나의 '+chosen.name;
     data={species:chosen.id,name,food:0,fed:0,earned:0,tally:{talk:0,word:0,crossword:0,quiz:0},seen:{word:{},quiz:{},crossword:{},crosswordComplete:{}},log:['🥚 '+chosen.name+' 알을 입양했어요']};
     save();$('petOnboard').hidden=true;document.body.classList.remove('pet-dialog-open');
-    render();announce('알을 입양했어요! 영어를 공부하고 먹이를 모아 부화시켜 보세요.');
+    render();announce('알을 입양했어요! 언어를 공부하고 먹이를 모아 부화시켜 보세요.');
     document.querySelector('[data-tab="pet"]')?.click();
   }
   $('petChooseBtn')?.addEventListener('click',choosePet);
