@@ -1,26 +1,78 @@
 <!doctype html>
 <html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>야나도 한다고 · English Adventure v0.4</title><meta name="theme-color" content="#fff6df">
-<link rel="stylesheet" href="./style-v03.css">
+<title>야나도 한다고 · English Adventure v0.5</title><meta name="theme-color" content="#fff6df">
+<link rel="stylesheet" href="./style-v03.css"><link rel="stylesheet" href="./pet-v05.css?v=05">
 <script>
-(function(){function ready(){var pin=document.getElementById('password'),gate=document.getElementById('gate'),app=document.getElementById('app'),error=document.getElementById('loginError');function unlock(){if(pin.value.trim()!=='2580'){error.textContent='비밀번호가 틀렸습니다.';return;}try{sessionStorage.setItem('yanado_session','1')}catch(e){}gate.hidden=true;app.hidden=false;pin.value='';error.textContent='';}document.getElementById('loginBtn').addEventListener('click',unlock);pin.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();unlock()}});document.getElementById('lockBtn').addEventListener('click',function(){try{sessionStorage.removeItem('yanado_session')}catch(e){}app.hidden=true;gate.hidden=false;});try{if(sessionStorage.getItem('yanado_session')==='1'){gate.hidden=true;app.hidden=false}}catch(e){}}document.addEventListener('DOMContentLoaded',ready)})();
+(function(){function ready(){var pin=document.getElementById('password'),gate=document.getElementById('gate'),app=document.getElementById('app'),error=document.getElementById('loginError');function unlock(){if(pin.value.trim()!=='2580'){error.textContent='비밀번호가 틀렸습니다.';return;}try{sessionStorage.setItem('yanado_session','1')}catch(e){}gate.hidden=true;app.hidden=false;pin.value='';error.textContent='';window.dispatchEvent(new Event('yanado:unlock'));}document.getElementById('loginBtn').addEventListener('click',unlock);pin.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();unlock()}});document.getElementById('lockBtn').addEventListener('click',function(){try{sessionStorage.removeItem('yanado_session')}catch(e){}app.hidden=true;gate.hidden=false;});try{if(sessionStorage.getItem('yanado_session')==='1'){gate.hidden=true;app.hidden=false}}catch(e){}}document.addEventListener('DOMContentLoaded',ready)})();
 </script>
 </head><body>
 <div class="gate" id="gate"><div class="login-card"><div class="logomascot" aria-hidden="true">🚌 🌈 🎧</div><h1>야나도 한다고</h1><p>영어로 이야기하는 작은 모험!</p><label for="password">입장 비밀번호</label><input id="password" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호 4자리"><button id="loginBtn" class="btn-main">영어 모험 시작 →</button><p class="err" id="loginError" role="alert"></p><p class="tiny">초기 테스트용 잠금입니다. 공개 웹사이트의 보안 인증 기능은 아닙니다.</p></div></div>
 <div id="app" hidden>
 <header class="masthead"><div class="brand"><div class="brand-icon">🚌</div><div><strong>야나도 한다고</strong><span>English Adventure · 자연스럽게 말해요</span></div></div><div class="header-actions"><span class="level" id="badgeLevel">대화 Lv.1</span><button id="lockBtn" class="btn-soft small">잠금</button></div></header>
 <div class="shell"><nav class="topnav" id="topnav" aria-label="학습 메뉴">
-<button data-tab="home" class="active">🏡 홈</button><button data-tab="guided">🗣️ 상황별 회화</button><button data-tab="free">✨ 자유 AI 대화</button><button data-tab="quiz">❓ 대화 퀴즈</button><button data-tab="words">🍎 그림 단어</button><button data-tab="crossword">🧩 가로세로</button><button data-tab="report">📈 나의 실력</button>
+<button data-tab="home" class="active">🏡 홈</button><button data-tab="guided">🗣️ 상황별 회화</button><button data-tab="free">✨ 자유 AI 대화</button><button data-tab="quiz">❓ 대화 퀴즈</button><button data-tab="words">🍎 그림 단어</button><button data-tab="crossword">🧩 가로세로</button><button data-tab="pet">🐾 펫 키우기</button><button data-tab="report">📈 나의 실력</button>
 </nav>
 <main>
-<section class="page active" id="home"><div class="hero"><div class="hero-text"><span class="eyebrow">ENGLISH ADVENTURE</span><h1>많이 듣고,<br>마음껏 말해요!</h1><p>문법이 틀려도 괜찮아요. 먼저 뜻이 통하는 영어부터.</p><button class="btn-main" data-open="guided">오늘의 회화 시작 →</button></div><div class="hero-art" aria-hidden="true">👩‍🏫<span>💬</span></div></div><div class="stat-row"><div class="stat"><strong id="homeThemes">60</strong><span>생활 대화 테마</span></div><div class="stat"><strong id="homeEpisodes">2,880</strong><span>상황 조건 조합</span></div><div class="stat"><strong id="homeWords">1,438</strong><span>단어장 단어</span></div><div class="stat"><strong>400</strong><span>퍼즐 판 선택</span></div></div><div class="menu-grid"><button data-open="guided" class="tile mint"><span>☕</span><strong>상황별 회화</strong><small>호텔·공항·식당 등 3회 이상 왕복</small></button><button data-open="free" class="tile blue"><span>✨</span><strong>자유 AI 대화</strong><small>내 추가 이야기로 대화 이어가기</small></button><button data-open="quiz" class="tile peach"><span>❓</span><strong>대화 퀴즈</strong><small>상황에서 알맞은 응답 고르기</small></button><button data-open="words" class="tile yellow"><span>🍎</span><strong>그림 단어</strong><small>아이콘·미국식 음성·뜻</small></button><button data-open="crossword" class="tile lilac"><span>🧩</span><strong>가로세로 퍼즐</strong><small>20개 이상 교차·자동 다음 칸</small></button><button data-open="report" class="tile mint"><span>📈</span><strong>학습 수준</strong><small>문법보다 의사전달을 우선</small></button></div></section>
+<section class="page active" id="home"><div class="hero"><div class="hero-text"><span class="eyebrow">ENGLISH ADVENTURE</span><h1>많이 듣고,<br>마음껏 말해요!</h1><p>문법이 틀려도 괜찮아요. 먼저 뜻이 통하는 영어부터.</p><button class="btn-main" data-open="guided">오늘의 회화 시작 →</button></div><div class="hero-art" aria-hidden="true">👩‍🏫<span>💬</span></div></div><div class="pet-preview-home" id="petHomePreview" aria-live="polite"><span class="preview-pet">🥚</span><div><b>나만의 펫 키우기</b><small>영어 공부해서 먹이를 모아 주세요</small></div></div><div class="stat-row"><div class="stat"><strong id="homeThemes">60</strong><span>생활 대화 테마</span></div><div class="stat"><strong id="homeEpisodes">2,880</strong><span>상황 조건 조합</span></div><div class="stat"><strong id="homeWords">1,438</strong><span>단어장 단어</span></div><div class="stat"><strong>400</strong><span>퍼즐 판 선택</span></div></div><div class="menu-grid"><button data-open="guided" class="tile mint"><span>☕</span><strong>상황별 회화</strong><small>호텔·공항·식당 등 3회 이상 왕복</small></button><button data-open="free" class="tile blue"><span>✨</span><strong>자유 AI 대화</strong><small>내 추가 이야기로 대화 이어가기</small></button><button data-open="quiz" class="tile peach"><span>❓</span><strong>대화 퀴즈</strong><small>상황에서 알맞은 응답 고르기</small></button><button data-open="words" class="tile yellow"><span>🍎</span><strong>그림 단어</strong><small>아이콘·미국식 음성·뜻</small></button><button data-open="crossword" class="tile lilac"><span>🧩</span><strong>가로세로 퍼즐</strong><small>20개 이상 교차·자동 다음 칸</small></button><button data-open="report" class="tile mint"><span>📈</span><strong>학습 수준</strong><small>문법보다 의사전달을 우선</small></button></div></section>
 <section class="page" id="guided"><div class="section-title"><div><span class="eyebrow">SITUATION TALK</span><h2>🗣️ 상황별 회화</h2><p>테마마다 질문 3개 이상, 추가로 말하면 그 내용도 이어받아 질문해요.</p></div></div><div class="toolbar"><label>테마 <select id="guidedTopic"></select></label><button class="btn-soft" id="randomGuided">🎲 랜덤</button><button class="btn-soft" id="restartGuided">↺ 새로운 상황</button><label>음성 속도 <select id="speakSpeed"><option value="1">미국식 보통 (1.0)</option><option value=".85">천천히 (0.85)</option><option value="1.1">빠르게 (1.1)</option></select></label></div><div class="study-layout"><div class="stage-column"><div class="stage" id="guidedStage"><div class="stage-img" id="guidedBg"></div><div class="stage-emoji" id="guidedIcon">🏨</div><div class="stage-person">👩‍🏫</div><div class="stage-caption" id="guidedScenario">상황을 선택하세요</div></div><div class="info-strip"><span id="guidedProgress">0회 대화</span><span class="level" id="guidedLevel">Lv.1</span></div><p class="tiny">음성은 기기·Chrome에서 제공하는 en-US 음성을 사용합니다. 실제 미국인 녹음과 같지는 않습니다.</p></div><div class="conversation-column"><div id="guidedHistory" class="chatbox" aria-live="polite"></div><div class="switches"><button class="btn-soft" id="guidedTranslate" aria-pressed="false">🇰🇷 한글 번역 보기</button><button class="btn-soft" id="guidedGloss" aria-pressed="false">📖 대화 단어 뜻</button><button class="btn-soft" id="guidedTip">💡 문법 팁</button></div><div id="guidedGlossBox" class="glossbox" hidden></div><div id="guidedTipBox" class="tipbox" hidden></div><div class="response"><textarea id="guidedInput" rows="2" placeholder="영어로 자유롭게 답하세요. 여러 문장으로 더 이야기해도 돼요."></textarea><div class="response-actions"><button class="btn-soft" id="guidedMic">🎤 말하기</button><button class="btn-soft" id="guidedReplay">🔊 질문 듣기</button><button class="btn-main" id="guidedSend">대답 보내기 →</button></div></div><p class="status" id="guidedStatus"></p></div></div></section>
 <section class="page" id="free"><div class="section-title"><div><span class="eyebrow">FREE TALK</span><h2>✨ 자유 AI 대화</h2><p>내가 추가로 이야기한 내용까지 기억하면서 다음 대화를 이어갑니다.</p></div></div><div class="notice">현재는 <b>브라우저 내 대화 연습 엔진</b>이 기본으로 동작합니다. 실제 생성형 AI를 이용하려면 보안 서버 연결이 필요하며, API 키를 이 화면에 입력하지 않습니다.</div><div class="toolbar"><label>상황 <select id="freeTopic"></select></label><button class="btn-soft" id="freeRandom">🎲 랜덤</button><button class="btn-soft" id="freeReset">↺ 대화 초기화</button><label>서버(선택) <input id="freeEndpoint" type="url" placeholder="https://내-서버/api/chat" aria-label="개인 AI 서버 주소"></label><button id="freeSaveEndpoint" class="btn-soft small">서버 주소 저장</button></div><div class="study-layout"><div class="stage-column"><div class="stage" id="freeStage"><div class="stage-img" id="freeBg"></div><div class="stage-emoji" id="freeIcon">☕</div><div class="stage-person">👩‍🏫</div><div class="stage-caption" id="freeScenario"></div></div><span class="pill" id="freeMode">연습 엔진 · 서버 미연결</span></div><div class="conversation-column"><div class="chatbox" id="freeHistory" aria-live="polite"></div><div class="switches"><button id="freeTranslate" class="btn-soft" aria-pressed="false">🇰🇷 한글 번역 보기</button><button id="freeGloss" class="btn-soft" aria-pressed="false">📖 대화 단어 뜻</button><button id="freeReplay" class="btn-soft">🔊 질문 듣기</button></div><div class="glossbox" id="freeGlossBox" hidden></div><div class="response"><textarea id="freeInput" rows="2" placeholder="대답 후에 추가 이야기도 해보세요. 예: I'm going with my wife, and we want coffee."></textarea><div class="response-actions"><button class="btn-soft" id="freeMic">🎤 말하기</button><button class="btn-main" id="freeSend">대화 계속하기 →</button></div></div><p class="status" id="freeStatus"></p></div></div></section>
 <section class="page" id="quiz"><div class="section-title"><div><span class="eyebrow">CONVERSATION QUIZ</span><h2>❓ 상황별 대화 퀴즈</h2><p>회화 테마에 연결된 대화 문장으로 문제를 만듭니다.</p></div></div><div class="toolbar"><label>테마 <select id="quizTopic"><option value="all">전체 테마 랜덤</option></select></label><button class="btn-soft" id="quizNext">🎲 다른 문제</button><span class="pill" id="quizProgress">문제 준비 중</span></div><div class="quizcard"><div class="quizscene" id="quizScene"><div id="quizBg" class="stage-img"></div><span id="quizEmoji" class="quiz-emoji">☕</span></div><div class="question-card"><div class="eyebrow" id="quizContext"></div><h3 id="quizQuestion"></h3><div id="quizAnswers" class="quiz-answers"></div><div class="tipbox" id="quizFeedback" hidden></div></div></div></section>
 <section class="page" id="words"><div class="section-title"><div><span class="eyebrow">PICTURE WORDS</span><h2>🍎 그림 단어 암기</h2><p>간단한 아이콘형 그림 · 영어 발음 · 버튼을 눌러 뜻 확인</p></div></div><div class="toolbar"><label>단어 찾기 <input id="wordSearch" type="search" placeholder="apple · 호텔 · 버스"></label><label>종류 <select id="wordGroup"><option value="all">전체</option></select></label><button class="btn-soft" id="wordUnknown">모르는 단어만</button><span class="pill" id="wordCount">1,438개</span></div><div class="word-grid" id="wordGrid"></div><button class="btn-soft full" id="wordMore">단어 더 보기 +</button></section>
 <section class="page" id="crossword"><div class="section-title"><div><span class="eyebrow">CROSSWORD</span><h2>🧩 영어 가로세로 퍼즐</h2><p>한 판에 20단어 이상. 글자를 입력하면 자동으로 다음 칸으로 이동합니다.</p></div></div><div class="toolbar"><label>퍼즐 번호 <select id="puzzleNumber"></select></label><button class="btn-soft" id="puzzleNext">🎲 다른 퍼즐</button><button class="btn-main" id="puzzleCheck">정답 확인</button><span class="pill" id="puzzleInfo">준비 중</span></div><div class="puzzle-layout"><div><div class="puzzle-viewport" id="puzzleViewport"><div class="puzzle-grid" id="puzzleGrid"></div></div><div class="tipbox" id="puzzleMessage">가로/세로 문제를 터치하면 해당 단어부터 입력합니다.</div></div><div class="clue-panels" id="puzzleClues"></div></div></section>
+<section class="page" id="pet">
+  <div class="section-title"><div><span class="eyebrow">MY STUDY COMPANION</span><h2>🐾 나의 펫 키우기</h2><p>어떤 영어를 공부해도 먹이를 얻어요. 밥을 주며 알에서 성체까지 성장시키세요!</p></div></div>
+  <div class="pet-grid">
+    <div class="pet-playground">
+      <div class="pet-title-pill">🐾 <span id="petNickname">나의 펫</span></div>
+      <div class="pet-hut" aria-hidden="true">🏠</div>
+      <div class="pet-avatar" id="petAvatar" aria-label="나의 펫" data-stage="0">🥚</div>
+      <div class="pet-heart" aria-hidden="true">💗</div><div class="pet-bowl" aria-hidden="true">🥣</div>
+    </div>
+    <div class="pet-side">
+      <div class="pet-box">
+        <h3>🌟 성장 단계 <span id="petStage">🥚 알</span></h3>
+        <div class="pet-current"><span id="petSpeciesLabel">펫을 선택하세요</span></div>
+        <div class="pet-meter" role="progressbar" aria-label="성장 진행"><div id="petLevelBar" class="pet-meter-fill"></div></div>
+        <p class="tiny" id="petNext">영어를 공부하고 먹이를 얻으세요</p>
+        <div class="pet-stage-row">
+          <div class="pet-stage-cell"><div class="stage-emoji">🥚</div><span>알</span></div>
+          <div class="pet-stage-cell"><div class="stage-emoji">🐣</div><span>부화</span></div>
+          <div class="pet-stage-cell"><div class="stage-emoji">🐾</div><span>아기</span></div>
+          <div class="pet-stage-cell"><div class="stage-emoji">⭐</div><span>청소년</span></div>
+          <div class="pet-stage-cell"><div class="stage-emoji">👑</div><span>성체</span></div>
+        </div>
+      </div>
+      <div class="pet-box">
+        <h3>🍎 먹이주기</h3><div class="pet-current">보유 먹이 <strong id="petFood">0</strong>개</div>
+        <div class="pet-food-panel">
+          <button class="btn-main" id="petFeedBtn">🥣 먹이 1개 주기</button>
+          <button class="btn-soft" id="petFeedFive">🍲 먹이 5개 주기</button>
+        </div>
+        <p class="tiny">총 획득 <b id="petEarned">0</b>개 · 총 먹이 주기 <b id="petFed">0</b>개</p>
+        <p id="petNotice" class="pet-notice" aria-live="polite">영어 회화·퀴즈·단어·퍼즐을 학습해 보세요!</p>
+      </div>
+      <div class="pet-box"><h3>📚 학습과 펫 성장</h3><div id="petStats" class="pet-petstats"></div>
+        <div class="tipbox">💬 회화 대답 2회 → 먹이 1개<br>❓ 대화 퀴즈 풀이 → 먹이 1~2개<br>📖 새 단어 암기 3개 → 먹이 1개<br>🧩 가로세로 정답 단어 2개 → 먹이 1개<br>🏆 퍼즐 한 판 완성 → 추가 3개</div>
+      </div>
+      <div class="pet-box"><h3>✨ 성장 기록</h3><ol id="petFeedLog" class="pet-log"></ol>
+        <div class="pet-name-edit"><input id="petRename" maxlength="18" placeholder="펫 이름 변경"><button class="btn-soft small" id="petNameSave">저장</button></div>
+      </div>
+    </div>
+  </div>
+</section>
 <section class="page" id="report"><div class="section-title"><div><span class="eyebrow">MY ENGLISH</span><h2>📈 나의 학습 수준</h2><p>의사전달 우선으로 난이도를 조절합니다. 공인 영어 능력 인증 결과는 아닙니다.</p></div></div><div class="stat-row" id="reportStats"></div><div class="report-panel" id="reportDetails"></div><button id="clearProgress" class="btn-soft">이 기기 학습 기록 삭제</button></section>
-</main><footer>야나도 한다고 · v0.4 · Chrome 웹 전용 · 단어 뜻과 번역은 학습용 · 데이터는 현재 브라우저에 저장됩니다.</footer></div></div>
-<script src="./content-v03.js"></script><script src="./expansion-v04.js"></script><script src="./app-v03.js?v=04"></script>
+</main><footer>야나도 한다고 · v0.5 · Chrome 웹 전용 · 단어 뜻과 번역은 학습용 · 데이터는 현재 브라우저에 저장됩니다.</footer></div></div>
+<div id="petOnboard" class="pet-overlay" role="dialog" aria-modal="true" aria-label="첫 펫 선택" hidden>
+  <div class="pet-modal">
+    <div class="eyebrow">WELCOME TO PET ADVENTURE!</div>
+    <h2 class="pet-title">🥚 영어 공부 친구를 골라요!</h2>
+    <p class="pet-desc">동물 10종 중 하나를 고르면 알부터 시작해요. 회화·퀴즈·단어·가로세로 중 무엇을 공부하든 먹이를 모아 키울 수 있어요. 성체는 귀여운 애니메이션 캐릭터로 성장해요.</p>
+    <div class="pet-options" id="petChoices" aria-label="펫 종류 선택"></div>
+    <label class="pet-name-field">펫 이름 (선택)<input id="petNameInput" maxlength="18" placeholder="예: 냥이, 뭉치, 토토" autocomplete="off"></label>
+    <button class="btn-main pet-adopt" id="petChooseBtn">🥚 이 펫의 알 입양하기</button>
+    <p class="tiny">선택한 펫과 학습 기록은 현재 브라우저에 저장됩니다. 다른 기기에는 자동 동기화되지 않습니다.</p>
+  </div>
+</div>
+<script src="./content-v03.js"></script><script src="./expansion-v04.js"></script><script src="./app-v03.js?v=05"></script><script src="./pet-art-v05.js?v=05"></script><script src="./pet-v05.js?v=05"></script>
 </body></html>
