@@ -1,17 +1,78 @@
 <!doctype html>
 <html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>야나도 한다고 · English Adventure v0.7</title><meta name="theme-color" content="#fff6df">
-<link rel="stylesheet" href="./style-v03.css"><link rel="stylesheet" href="./pet-v05.css?v=05"><link rel="stylesheet" href="./ui-v07.css?v=07">
+<title>야나도 한다고 · English/Japanese Adventure v0.8</title><meta name="theme-color" content="#fff6df">
+<link rel="stylesheet" href="./style-v03.css"><link rel="stylesheet" href="./pet-v05.css?v=05"><link rel="stylesheet" href="./ui-v07.css?v=07"><link rel="stylesheet" href="./ja-ui-v08.css?v=08">
 <script>
-(function(){function ready(){var pin=document.getElementById('password'),gate=document.getElementById('gate'),app=document.getElementById('app'),error=document.getElementById('loginError');function unlock(){if(pin.value.trim()!=='2580'){error.textContent='비밀번호가 틀렸습니다.';return;}try{sessionStorage.setItem('yanado_session','1')}catch(e){}gate.hidden=true;app.hidden=false;pin.value='';error.textContent='';window.dispatchEvent(new Event('yanado:unlock'));}document.getElementById('loginBtn').addEventListener('click',unlock);pin.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();unlock()}});document.getElementById('lockBtn').addEventListener('click',function(){try{sessionStorage.removeItem('yanado_session')}catch(e){}app.hidden=true;gate.hidden=false;});try{if(sessionStorage.getItem('yanado_session')==='1'){gate.hidden=true;app.hidden=false}}catch(e){}}document.addEventListener('DOMContentLoaded',ready)})();
+(function(){
+'use strict';
+const LANG_KEY='yanado_course_v08',VOICE_KEY='yanado_voice_gender_v07';
+let current='en';
+try{current=localStorage.getItem(LANG_KEY)==='ja'?'ja':'en'}catch(e){}
+window.YANA_LANGUAGE=current;
+function ready(){
+ const $=id=>document.getElementById(id);
+ const pin=$('password'),gate=$('gate'),app=$('app'),error=$('loginError'),choice=$('languageChoice'),voice=$('voiceGender');
+ choice.value=current;
+ try{voice.value=localStorage.getItem(VOICE_KEY)==='male'?'male':'female'}catch(e){voice.value='female'}
+ function update(){
+  $('loginBtn').textContent=choice.value==='ja'?'🇯🇵 일본어 학습 시작 →':'🇺🇸 영어 학습 시작 →';
+  $('courseLabel').textContent=choice.value==='ja'?'일본어 듣기·회화·낱말·퍼즐':'영어 듣기·회화·낱말·퍼즐';
+  $('voiceHint').textContent=(choice.value==='ja'?'일본어':'미국 영어')+' 음성을 우선 선택합니다. 실제 음색과 성별은 기기에 설치된 음성에 따라 달라질 수 있습니다.';
+ }
+ choice.addEventListener('change',update);update();
+ function pickVoice(lang,gender){
+   if(!('speechSynthesis' in window))return null;
+   const voices=window.speechSynthesis.getVoices()||[];
+   const available=voices.filter(v=>v.lang?.toLowerCase().startsWith(lang.slice(0,2)));
+   const females=lang==='ja-JP'?/kyoko|haruka|mizuki|sakura|nanami|female|woman|hikari|akane/i:/samantha|ava|karen|victoria|susan|aria|female|woman|zira/i;
+   const males=lang==='ja-JP'?/otoya|ichiro|takumi|hiroshi|takeru|male|man|shinji/i:/alex|daniel|fred|tom|david|matthew|guy|male|man/i;
+   return available.find(v=>(gender==='male'?males:females).test(v.name))||available[0]||null;
+ }
+ $('voicePreview').addEventListener('click',()=>{
+  if(!('speechSynthesis' in window)){error.textContent='이 브라우저에서는 음성 미리 듣기를 지원하지 않습니다.';return}
+  const lang=choice.value==='ja'?'ja-JP':'en-US',sample=choice.value==='ja'?'こんにちは！いっしょに日本語を練習しましょう！':"Hi there! Let's practice English together!";
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(sample);u.lang=lang;u.rate=1;u.pitch=voice.value==='male'?0.96:1.06;const v=pickVoice(lang,voice.value);if(v)u.voice=v;window.speechSynthesis.speak(u);
+ });
+ function unlock(){
+  if(pin.value.trim()!=='2580'){error.textContent='비밀번호가 틀렸습니다.';return}
+  const selected=choice.value==='ja'?'ja':'en';
+  try{localStorage.setItem(VOICE_KEY,voice.value);localStorage.setItem(LANG_KEY,selected);sessionStorage.setItem('yanado_session','1')}catch(e){}
+  pin.value='';error.textContent='';
+  if(selected!==current){window.location.reload();return}
+  gate.hidden=true;app.hidden=false;window.dispatchEvent(new Event('yanado:unlock'));
+ }
+ $('loginBtn').addEventListener('click',unlock);
+ pin.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();unlock()}});
+ $('lockBtn').addEventListener('click',()=>{
+   try{sessionStorage.removeItem('yanado_session')}catch(e){}
+   app.hidden=true;gate.hidden=false;
+ });
+ try{if(sessionStorage.getItem('yanado_session')==='1'){gate.hidden=true;app.hidden=false}}catch(e){}
+ if(current==='ja'){
+   document.title='야나도 한다고 · 일본어 학습 v0.8';
+   document.querySelector('.brand span').textContent='Japanese Adventure · 일본어를 자연스럽게';
+   document.querySelector('.hero p').textContent='일본어도 듣고 말하면서 익혀요. 조금 틀려도 뜻이 통하는 것이 먼저!';
+   document.querySelector('#guided h2').textContent='🗣️ 상황별 일본어 회화';
+   document.querySelector('#free h2').textContent='✨ 일본어 자유 대화 연습';
+   document.querySelector('#quiz h2').textContent='❓ 일본어 대화 퀴즈';
+   document.querySelector('#words h2').textContent='🍙 일본어 단어 암기';
+   document.querySelector('#crossword h2').textContent='🧩 일본어 가로세로';
+   document.querySelector('#guidedInput').placeholder='일본어로 대답하세요. 예: はい、ホテルに行きます。';
+   document.querySelector('#freeInput').placeholder='일본어로 자유롭게 이야기해 보세요.';
+   document.querySelector('#guidedMic').title='일본어 음성 인식';
+ }
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready);else ready();
+})();
 </script>
 </head><body>
-<div class="gate" id="gate"><div class="login-card"><div class="logomascot" aria-hidden="true">🚌 🌈 🎧</div><h1>야나도 한다고</h1><p>영어로 이야기하는 작은 모험!</p><label for="password">입장 비밀번호</label><input id="password" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호 4자리"><div class="voice-login">
-  <label for="voiceGender">영어 선생님 목소리 선택</label>
-  <select id="voiceGender" aria-label="미국 영어 음성 성별"><option value="female">밝은 여성 음성</option><option value="male">밝은 남성 음성</option></select>
+<div class="gate" id="gate"><div class="login-card"><div class="logomascot" aria-hidden="true">🚌 🌈 🎧</div><h1>야나도 한다고</h1><p>영어로 이야기하는 작은 모험!</p><label for="languageChoice">학습 언어 선택</label><select id="languageChoice" class="course-select"><option value="en">🇺🇸 영어</option><option value="ja">🇯🇵 일본어</option></select><p class="tiny" id="courseLabel"></p><label for="password">입장 비밀번호</label><input id="password" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호 4자리"><div class="voice-login">
+  <label for="voiceGender">선생님 목소리 선택</label>
+  <select id="voiceGender" aria-label="미국 영어 음성 성별"><option value="female">밝은 여성 목소리</option><option value="male">밝은 남성 목소리</option></select>
   <button type="button" id="voicePreview" class="btn-soft small">🔊 선택한 목소리 미리 듣기</button>
-  <small>기기에서 제공하는 미국식 영어 음성 중 선택합니다. 실제 음색과 연령대는 기기에 따라 다릅니다.</small>
+  <small><span id="voiceHint">학습 언어에 맞는 음성을 우선 선택합니다.</span></small>
 </div><button id="loginBtn" class="btn-main">영어 모험 시작 →</button><p class="err" id="loginError" role="alert"></p><p class="tiny">초기 테스트용 잠금입니다. 공개 웹사이트의 보안 인증 기능은 아닙니다.</p></div></div>
 <div id="app" hidden>
 <header class="masthead"><div class="brand"><div class="brand-icon">🚌</div><div><strong>야나도 한다고</strong><span>English Adventure · 자연스럽게 말해요</span></div></div><div class="header-actions"><span class="level" id="badgeLevel">대화 Lv.1</span><button id="lockBtn" class="btn-soft small">잠금</button></div></header>
@@ -75,7 +136,7 @@
   </div>
 </section>
 <section class="page" id="report"><div class="section-title"><div><span class="eyebrow">MY ENGLISH</span><h2>📈 나의 학습 수준</h2><p>의사전달 우선으로 난이도를 조절합니다. 공인 영어 능력 인증 결과는 아닙니다.</p></div></div><div class="stat-row" id="reportStats"></div><div class="report-panel" id="reportDetails"></div><button id="clearProgress" class="btn-soft">이 기기 학습 기록 삭제</button></section>
-</main><footer>야나도 한다고 · v0.7 · Chrome 웹 전용 · 단어 뜻과 번역은 학습용 · 데이터는 현재 브라우저에 저장됩니다.</footer></div></div>
+</main><footer>야나도 한다고 · v0.8 · Chrome 웹 전용 · 단어 뜻과 번역은 학습용 · 데이터는 현재 브라우저에 저장됩니다.</footer></div></div>
 <div id="petOnboard" class="pet-overlay" role="dialog" aria-modal="true" aria-label="첫 펫 선택" hidden>
   <div class="pet-modal">
     <div class="eyebrow">WELCOME TO PET ADVENTURE!</div>
@@ -87,5 +148,7 @@
     <p class="tiny">선택한 펫과 학습 기록은 현재 브라우저에 저장됩니다. 다른 기기에는 자동 동기화되지 않습니다.</p>
   </div>
 </div>
-<script src="./content-v03.js"></script><script src="./expansion-v04.js"></script><script src="./word-visuals-v07.js?v=071"></script><script src="./quiz-translations-v07.js?v=07"></script><script src="./conversation-eval-v07.js?v=072"></script><script src="./app-v07.js?v=071"></script><script src="./pet-art-v05.js?v=05"></script><script src="./pet-v05.js?v=05"></script><script src="./backup-v06-ui.js?v=06"></script>
+<script src="./content-v03.js"></script><script src="./expansion-v04.js"></script><script src="./word-visuals-v07.js?v=071"></script>
+<script src="./ja-dict-01.js?v=08"></script><script src="./ja-dict-02.js?v=08"></script><script src="./ja-dict-03.js?v=08"></script><script src="./ja-dict-04.js?v=08"></script><script src="./quiz-translations-v07.js?v=07"></script>
+<script src="./ja-conversation-01.js?v=08"></script><script src="./ja-conversation-02.js?v=08"></script><script src="./ja-conversation-03.js?v=08"></script><script src="./ja-catalog-v08.js?v=08"></script><script src="./ja-eval-v08.js?v=08"></script><script src="./conversation-eval-v07.js?v=072"></script><script src="./app-v07.js?v=08"></script><script src="./ja-app-v08.js?v=08"></script><script src="./pet-art-v05.js?v=05"></script><script src="./pet-v05.js?v=05"></script><script src="./backup-v06-ui.js?v=06"></script>
 </body></html>
