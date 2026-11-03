@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>야나도 한다고 · English Adventure</title>
+<title>야나도 한다고 · English Adventure v0.2</title>
 <meta name="theme-color" content="#fcf7ed">
 <style>
 :root{--ink:#263c4b;--mint:#bcefe5;--peach:#ffe1c6;--yellow:#fff0a9;--blue:#cde3ff;--line:#e3e4dd;--card:#fffdfa}
@@ -40,7 +40,30 @@ select,.answerinput{max-width:100%;border:2px solid var(--line);background:white
 footer{text-align:center;color:#7d959c;font-size:12px;margin-top:24px}
 @media(max-width:700px){.gridmenu{grid-template-columns:repeat(2,minmax(0,1fr))}.vocgrid{grid-template-columns:repeat(2,1fr)}.clues{grid-template-columns:1fr}.score{grid-template-columns:repeat(2,1fr)}.card{padding:15px}.scene{min-height:140px}.head{align-items:start}.char{width:75px;height:75px;font-size:44px}.cell{width:26px;height:26px}}
 @media(min-width:701px) and (max-width:1000px){.gridmenu{grid-template-columns:repeat(3,1fr)}.vocgrid{grid-template-columns:repeat(3,1fr)}}
-</style></head><body>
+</style><script>
+(function(){
+ function start(){
+   var gate=document.getElementById('gate');
+   var app=document.getElementById('app');
+   var pin=document.getElementById('pin');
+   var err=document.getElementById('pinError');
+   function unlock(){
+     if(String(pin.value).trim()!=='2580'){err.textContent='비밀번호가 일치하지 않습니다.';return;}
+     try{sessionStorage.setItem('yanado_access','yes')}catch(e){}
+     gate.classList.add('hide');app.classList.remove('hide');err.textContent='';
+     pin.value='';
+   }
+   document.getElementById('unlock').addEventListener('click',unlock);
+   pin.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();unlock();}});
+   document.getElementById('lock').addEventListener('click',function(){
+     try{sessionStorage.removeItem('yanado_access')}catch(e){}
+     app.classList.add('hide');gate.classList.remove('hide');
+   });
+   try{if(sessionStorage.getItem('yanado_access')==='yes'){gate.classList.add('hide');app.classList.remove('hide');}}catch(e){}
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
+</script></head><body>
 <div id="gate" class="gate"><div class="gatebox"><div style="font-size:65px">🚌✨</div><h1>야나도 한다고</h1><p>애니메이션 속 영어 모험을 시작해요!</p><label for="pin">접속 비밀번호</label><input id="pin" type="password" inputmode="numeric" maxlength="12" autocomplete="off" placeholder="비밀번호 입력"><button class="primary" style="width:100%" id="unlock">입장하기 →</button><p id="pinError" style="color:#bd5959" aria-live="polite"></p><p class="small">학습 체험용 간단 잠금입니다. 실제 보안 인증은 아닙니다.</p></div></div>
 <main id="app" class="wrap hide">
 <header class="head"><div><div class="logo">🚌 야나도 한다고 <span style="font-size:16px">✨</span></div><div class="sub">Talk first · Learn naturally · English Adventure</div></div><div><span class="pill" id="levelBadge">Conversation L1</span> <button class="secondary" id="lock">잠금</button></div></header>
@@ -52,16 +75,14 @@ footer{text-align:center;color:#7d959c;font-size:12px;margin-top:24px}
 <section id="words" class="panel"><div class="card"><h2>🍎 그림 단어 암기</h2><p class="small">카툰 스타일의 아이콘은 초기 버전용입니다. 향후 통일된 오리지널 애니 일러스트로 교체합니다.</p><div class="controls"><button class="secondary" id="shuffleWords">🔀 순서 섞기</button><button class="secondary" id="reviewWords">🔁 미암기 단어</button></div><div id="vocgrid" class="vocgrid"></div></div></section>
 <section id="cross" class="panel"><div class="card"><h2>🧩 가로세로 낱말 퍼즐</h2><p class="small">단어 20개를 실제로 교차 배치하는 퍼즐을 생성합니다. 칸을 터치하여 입력하세요.</p><div class="controls"><button class="secondary" id="newPuzzle">🎲 새로운 판</button><button class="secondary" id="checkPuzzle">✅ 정답 확인</button><span class="pill" id="puzInfo">생성 중</span></div><div class="puzzlewrap"><div id="puzzle" class="puzzle"></div></div><div id="puzResult" aria-live="polite"></div><div id="clues" class="clues"></div></div></section>
 <section id="report" class="panel"><div class="card"><h2>📊 나의 영어 실력</h2><p class="small">이 보고서는 브라우저에 저장된 연습 기록 기반의 내부 추정치입니다. 공인 CEFR 판정이 아닙니다.</p><div id="stats" class="score"></div><div id="reportBody"></div><button class="secondary" id="resetData">학습 기록 초기화</button></div></section>
-<footer>야나도 한다고 · v0.1 browser prototype · Chrome · 학습 기록은 현재 기기 브라우저에만 저장됨</footer></main>
+<footer>야나도 한다고 · v0.2 browser prototype · Chrome · 학습 기록은 현재 기기 브라우저에만 저장됨</footer></main>
 <script>
 "use strict";
 const PIN="2580",KEY="yanado_v01";const $=id=>document.getElementById(id);const state=(()=>{try{return {...{level:1,success:0,attempts:0,quizRight:0,quizCount:0,known:[],themes:{}},...JSON.parse(localStorage.getItem(KEY)||"{}")}}catch{return {level:1,success:0,attempts:0,quizRight:0,quizCount:0,known:[],themes:{}}}})();
-function save(){localStorage.setItem(KEY,JSON.stringify(state));$("levelBadge").textContent="Conversation L"+state.level}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}$("levelBadge").textContent="Conversation L"+state.level}
 function speak(t){if(!("speechSynthesis" in window))return alert("이 브라우저는 음성 읽기를 지원하지 않습니다.");speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=.88;speechSynthesis.speak(u)}
 function tab(id){document.querySelectorAll(".panel").forEach(e=>e.classList.toggle("on",e.id===id));document.querySelectorAll(".tab").forEach(e=>e.classList.toggle("on",e.dataset.tab===id));if(id==="report")renderReport();window.scrollTo({top:0,behavior:"smooth"})}
 document.querySelectorAll("[data-tab]").forEach(e=>e.onclick=()=>tab(e.dataset.tab));document.querySelectorAll("[data-go]").forEach(e=>e.onclick=()=>tab(e.dataset.go));
-$("unlock").onclick=()=>{if($("pin").value===PIN){sessionStorage.setItem("yanado_access","yes");$("gate").classList.add("hide");$("app").classList.remove("hide");$("pin").value=""}else $("pinError").textContent="비밀번호를 다시 확인하세요."};$("pin").addEventListener("keydown",e=>{if(e.key==="Enter")$("unlock").click()});
-$("lock").onclick=()=>{sessionStorage.removeItem("yanado_access");$("app").classList.add("hide");$("gate").classList.remove("hide")};if(sessionStorage.getItem("yanado_access")==="yes"){$("gate").classList.add("hide");$("app").classList.remove("hide")}
 const scenes=[
 {id:"cafe",name:"☕ 카페·식당",art:"☕🥐",steps:[["What would you like to drink?","coffee tea water juice milk","무엇을 마시겠어요?"],["Would you like something to eat?","yes no sandwich cake bread","먹을 것도 주문하시겠어요?"],["Is that for here or to go?","here go take away","매장에서 드시나요, 포장하시나요?"],["How would you like to pay?","card cash","어떻게 결제하시겠어요?"]]},
 {id:"bus",name:"🚌 버스·교통",art:"🚌🚏",steps:[["Where are you going?","home school station airport work park","어디 가고 있나요?"],["Are you taking the bus?","yes no bus taxi train","버스를 타시나요?"],["Do you have a ticket?","yes no ticket card","표가 있나요?"],["When do you need to arrive?","now soon morning afternoon night five six","언제 도착해야 하나요?"]]},
