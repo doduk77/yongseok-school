@@ -4,7 +4,7 @@
   const KEY = 'yanado_pet_v05';
   const animals = [
     {id:'elephant',name:'코끼리',face:'🐘',tone:'#cbe5ff'},
-    {id:'sheep',name:'양',face:'🐑',tone:'#fff0f9'},
+    {id:'rabbit',name:'토끼',face:'🐰',tone:'#fff0f9'},
     {id:'tiger',name:'호랑이',face:'🐯',tone:'#ffe4b8'},
     {id:'frog',name:'개구리',face:'🐸',tone:'#d7f9c4'},
     {id:'panda',name:'판다',face:'🐼',tone:'#f0e9ff'},
@@ -38,6 +38,7 @@
   function save() { if (!data) return; try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e) {} }
   function stageIndex() { let n=0; for(let i=0;i<stages.length;i++) if(data.fed>=stages[i].limit)n=i;return n; }
   function animal() { return animals.find(x=>x.id===data?.species) || animals[0]; }
+  function artOf(a){const url=window.YANA_PET_ART?.[a.id];return url?'<img src="'+url+'" alt="'+safe(a.name)+' 캐릭터" class="pet-drawing" decoding="async">':a.face;}
   function announce(s){const el=$('petNotice');if(el)el.textContent=s;}
   function record(label){data.log.push(label);data.log=data.log.slice(-10);}
   function reward(n,label){
@@ -86,7 +87,7 @@
     const pct=next?Math.max(0,Math.min(100,Math.round((data.fed-lower)/(next.limit-lower)*100))):100;
     const activeEmoji=index===0?'🥚':a.face;
     const avatar=$('petAvatar');
-    if(avatar){avatar.textContent=activeEmoji;avatar.dataset.stage=String(index);avatar.style.background='radial-gradient(circle at 30% 20%,white,'+a.tone+')';}
+    if(avatar){avatar.innerHTML=index===0?'🥚':artOf(a);avatar.dataset.stage=String(index);avatar.style.background='radial-gradient(circle at 30% 20%,white,'+a.tone+')';}
     if($('petNickname'))$('petNickname').textContent=data.name;
     if($('petSpeciesLabel'))$('petSpeciesLabel').textContent=a.name+' · '+st.name;
     if($('petFood'))$('petFood').textContent=data.food;
@@ -103,7 +104,7 @@
     ].map(v=>'<div class="pet-stat"><span>'+v[0]+'</span><strong>'+v[2]+'</strong><small>'+v[1]+'</small></div>').join('');
     if($('petFeedLog'))$('petFeedLog').innerHTML=data.log.slice().reverse().slice(0,6).map(x=>'<li>'+safe(x)+'</li>').join('') || '<li>영어 공부를 시작하면 여기에 기록이 쌓여요.</li>';
     const preview=$('petHomePreview');
-    if(preview)preview.innerHTML='<span class="preview-pet">'+activeEmoji+'</span><div><b>'+safe(data.name)+' · '+safe(st.name)+'</b><small>🍎 먹이 '+data.food+'개 · 총 먹이주기 '+data.fed+'회</small></div><button type="button" class="btn-main" id="openMyPet">펫에게 밥 주기 →</button>';
+    if(preview)preview.innerHTML='<span class="preview-pet">'+(index===0?'🥚':artOf(a))+'</span><div><b>'+safe(data.name)+' · '+safe(st.name)+'</b><small>🍎 먹이 '+data.food+'개 · 총 먹이주기 '+data.fed+'회</small></div><button type="button" class="btn-main" id="openMyPet">펫에게 밥 주기 →</button>';
     $('openMyPet')?.addEventListener('click',()=>document.querySelector('[data-tab="pet"]')?.click());
   }
   function paintPicker(){
@@ -113,7 +114,7 @@
       const btn=document.createElement('button');btn.type='button';
       btn.className='pet-option'+(a.id===selected?' selected':'');
       btn.style.setProperty('--pet-tint',a.tone);
-      btn.innerHTML='<span class="pet-icon">'+a.face+'</span><strong>'+a.name+'</strong>';
+      btn.innerHTML='<span class="pet-icon">'+artOf(a)+'</span><strong>'+a.name+'</strong>';
       btn.setAttribute('aria-pressed',String(a.id===selected));
       btn.addEventListener('click',()=>{selected=a.id;paintPicker();});
       area.appendChild(btn);
