@@ -2,7 +2,7 @@
 <html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>야나도 한다고 · English & Japanese Adventure v0.9</title><meta name="theme-color" content="#fff6df">
-<link rel="stylesheet" href="./style-v03.css"><link rel="stylesheet" href="./pet-v05.css?v=05"><link rel="stylesheet" href="./ui-v07.css?v=07"><link rel="stylesheet" href="./ja-ui-v08.css?v=08"><link rel="stylesheet" href="./controls-v09.css?v=09">
+<link rel="stylesheet" href="./style-v03.css"><link rel="stylesheet" href="./pet-v05.css?v=05"><link rel="stylesheet" href="./ui-v07.css?v=07"><link rel="stylesheet" href="./ja-ui-v08.css?v=08"><link rel="stylesheet" href="./controls-v09.css?v=091">
 <script>
 (function(){
 'use strict';
@@ -34,6 +34,8 @@ function ready(){
   const next=btn.dataset.switchLanguage;
   if(next!=='en'&&next!=='ja')return;
   if(next===current){document.querySelector('[data-tab="home"]')?.click();return}
+  const unsent=['guidedInput','freeInput'].some(id=>(document.getElementById(id)?.value||'').trim());
+  if(unsent&&typeof window.confirm==='function'&&!window.confirm('작성 중인 대화 입력은 언어 전환 후 사라집니다. 언어를 변경할까요?'))return;
   try{window.YANA_BACKUP?.checkpoint?.()}catch(e){}
   try{window.speechSynthesis?.cancel()}catch(e){}
   try{localStorage.setItem(LANG_KEY,next)}catch(e){error.textContent='언어 변경을 저장할 수 없습니다. 브라우저 저장 설정을 확인해 주세요.';return}
@@ -187,5 +189,5 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </div>
 <script src="./content-v03.js"></script><script src="./expansion-v04.js"></script><script src="./word-visuals-v07.js?v=071"></script>
 <script src="./ja-dict-01.js?v=08"></script><script src="./ja-dict-02.js?v=08"></script><script src="./ja-dict-03.js?v=08"></script><script src="./ja-dict-04.js?v=08"></script><script src="./quiz-translations-v07.js?v=07"></script>
-<script src="./ja-conversation-01.js?v=08"></script><script src="./ja-conversation-02.js?v=08"></script><script src="./ja-conversation-03.js?v=08"></script><script src="./ja-catalog-v08.js?v=08"></script><script src="./ja-eval-v08.js?v=08"></script><script src="./ja-gloss-v08.js?v=08"></script><script src="./conversation-eval-v07.js?v=072"></script><script src="./app-v07.js?v=09"></script><script src="./ja-app-v08.js?v=09"></script><script src="./pet-art-v05.js?v=05"></script><script src="./pet-v05.js?v=081"></script><script src="./backup-v06-ui.js?v=08"></script>
+<script src="./ja-conversation-01.js?v=08"></script><script src="./ja-conversation-02.js?v=08"></script><script src="./ja-conversation-03.js?v=08"></script><script src="./ja-catalog-v08.js?v=08"></script><script src="./ja-eval-v08.js?v=08"></script><script src="./ja-gloss-v08.js?v=08"></script><script src="./conversation-eval-v07.js?v=072"></script><script src="./app-v07.js?v=091"></script><script src="./ja-app-v08.js?v=091"></script><script src="./pet-art-v05.js?v=05"></script><script src="./pet-v05.js?v=081"></script><script src="./backup-v06-ui.js?v=08"></script>
 </body></html>
