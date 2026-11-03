@@ -14,7 +14,7 @@ if(!Array.isArray(progress.known))progress.known=[];
 var enVoice=null,VOICE_KEY='yanado_voice_gender_v07',voiceGender='female';
 try{voiceGender=localStorage.getItem(VOICE_KEY)==='male'?'male':'female'}catch(e){}
 const voiceNames={female:/samantha|ava|karen|victoria|susan|allison|joanna|jenny|zira|aria|jessa|female|woman/i,
-male:/alex|daniel|fred|tom|aaron|matthew|david|guy|james|brian|male|man/i};
+male:/alex|daniel|fred|tom|aaron|matthew|david|guy|james|brian|\bmale\b|\bman\b/i};
 function voices(){
  if(!window.speechSynthesis)return;
  const list=(window.speechSynthesis.getVoices()||[]).filter(v=>v.lang&&/^en/i.test(v.lang));
