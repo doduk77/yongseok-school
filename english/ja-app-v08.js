@@ -36,9 +36,14 @@ const common={i:'나',you:'당신',we:'우리',they:'그들',my:'나의',your:'�
 
 function glossary(text){
  const str=String(text||''),found=[],seen=new Set();
+ for(const [term,meaning] of [...(window.YANA_JP_GLOSS||new Map())].sort((a,b)=>b[0].length-a[0].length)){
+  if(term.length<2||seen.has(term)||!str.includes(term))continue;
+  found.push({en:term,ko:meaning});seen.add(term);
+  if(found.length>=16)break;
+ }
  for(const w of D.WORDS.slice().sort((a,b)=>b.word.length-a.word.length)){
    if(w.word.length<2||seen.has(w.word)||!str.includes(w.word))continue;
-   seen.add(w.word);found.push({en:w.word,ko:w.ko});if(found.length>=20)break;
+   seen.add(w.word);found.push({en:w.word,ko:w.ko});if(found.length>=25)break;
  }
  return found;
 }
