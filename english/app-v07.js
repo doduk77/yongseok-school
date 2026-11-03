@@ -281,13 +281,13 @@ var PNUM=400,puzzle=null,selected=null;
 for(var n=1;n<=PNUM;n++)$('puzzleNumber').add(new Option('퍼즐 '+n,n));
 function rng(seed){var x=seed|0;return function(){x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296}}
 function shuffle(list,random){for(var i=list.length-1;i>0;i--){var j=Math.floor(random()*(i+1));var t=list[i];list[i]=list[j];list[j]=t}return list}
-function buildPuzzle(num){var pool=D.WORDS.filter(w=>/^[A-Z]{3,11}$/.test(w.word));var size=29,best=null;
-for(var round=0;round<18;round++){
-var r=rng(num*31337+round*9089+773);
-var entries=shuffle([...pool],r).slice(0,52);
+function buildPuzzle(num){var difficulty=$('puzzleDifficulty')?.value||'medium';var minLen=difficulty==='easy'?3:difficulty==='hard'?7:4;var maxLen=difficulty==='easy'?5:difficulty==='hard'?11:8;var pattern=new RegExp('^[A-Z]{'+minLen+','+maxLen+'}$');var pool=D.WORDS.filter(w=>pattern.test(w.word));var size=difficulty==='hard'?37:29,best=null;
+for(var round=0;round<30;round++){
+var r=rng(num*31337+round*9089+773+(difficulty==='easy'?111111:difficulty==='hard'?333333:222222));
+var entries=shuffle([...pool],r).slice(0,80);
 entries.sort((a,b)=>b.word.length-a.word.length);
 var grid=Array.from({length:size},()=>Array(size).fill(''));
-var placed=[],first=entries.shift(),sr=14,sc=Math.floor((size-first.word.length)/2);
+var placed=[],first=entries.shift(),sr=Math.floor(size/2),sc=Math.floor((size-first.word.length)/2);
 for(var i=0;i<first.word.length;i++)grid[sr][sc+i]=first.word[i];
 placed.push({word:first.word,ko:first.ko,dir:'across',row:sr,col:sc});
 for(var entry of entries){var w=entry.word,candidates=[];
@@ -311,7 +311,7 @@ if(placed.length>=23)break
 if(!best||placed.length>best.placed.length)best={grid,placed,size};
 if(placed.length>=20)break
 }
-if(best.placed.length<20)return null;
+if(!best||best.placed.length<20)return null;
 var numbering=new Map(),count=0;
 best.placed.sort((a,b)=>a.row-b.row||a.col-b.col);
 best.placed.forEach(w=>{var id=w.row+','+w.col;if(!numbering.has(id))numbering.set(id,++count);w.number=numbering.get(id)});
@@ -324,10 +324,11 @@ for(var y=minY;y<=maxY;y++)for(var x=minX;x<=maxX;x++){var wrap=document.createE
 var clueWrap=$('puzzleClues');clueWrap.innerHTML='';['across','down'].forEach(dir=>{var panel=document.createElement('div');panel.className='cluepanel';panel.innerHTML='<h3>'+(dir==='across'?'가로':'세로')+' ('+puzzle.placed.filter(x=>x.dir===dir).length+')</h3>';puzzle.placed.filter(x=>x.dir===dir).sort((a,b)=>a.number-b.number).forEach(w=>{var b=document.createElement('button');b.className='clue';b.dataset.word=w.word;b.textContent=w.number+'. '+w.ko+' ('+w.word.length+'글자)';b.onclick=()=>selectWord(w,0);panel.appendChild(b)});clueWrap.appendChild(panel)});
 $('puzzleInfo').textContent='실제 교차 단어 '+puzzle.placed.length+'개';msg.textContent='정답을 입력하면 같은 단어의 다음 칸으로 자동 이동합니다.';selected=puzzle.placed[0];selectWordHighlight(selected)}
 function selectWordHighlight(p){if(!p)return;document.querySelectorAll('#puzzleClues .clue').forEach(b=>b.classList.toggle('active',b.dataset.word===p.word));document.querySelectorAll('#puzzleGrid input').forEach(el=>el.classList.remove('chosen'));for(var i=0;i<p.word.length;i++){var cell=focusCell(p,i);if(cell)cell.classList.add('chosen')}}
-$('puzzleNumber').onchange=()=>renderPuzzle(Number($('puzzleNumber').value));$('puzzleNext').onclick=()=>{$('puzzleNumber').value=1+Math.floor(Math.random()*PNUM);renderPuzzle(Number($('puzzleNumber').value))};
+$('puzzleNumber').onchange=()=>renderPuzzle(Number($('puzzleNumber').value));
+$('puzzleDifficulty').onchange=()=>renderPuzzle(Number($('puzzleNumber').value));$('puzzleNext').onclick=()=>{$('puzzleNumber').value=1+Math.floor(Math.random()*PNUM);renderPuzzle(Number($('puzzleNumber').value))};
 $('puzzleCheck').onclick=()=>{if(!puzzle)return;var ok=0,all=0;
 document.querySelectorAll('#puzzleGrid input').forEach(el=>{var [r,c]=el.dataset.position.split(',').map(Number);var right=el.value.toUpperCase()===puzzle.grid[r][c];el.classList.toggle('correct',right);ok+=right?1:0;all++});
-var puzzleId=String($('puzzleNumber').value||1);
+var puzzleId=($('puzzleDifficulty')?.value||'medium')+'|'+String($('puzzleNumber').value||1);
 puzzle.placed.forEach(w=>{var solved=[...w.word].every((char,i)=>{var el=focusCell(w,i);return !!el&&el.value.trim().toUpperCase()===char});if(solved)petReward('crossword',puzzleId+'|'+w.word+'|'+w.dir+'|'+w.row+'|'+w.col)});
 if(ok===all&&all>0)petReward('crosswordComplete',puzzleId);
 $('puzzleMessage').textContent='맞힌 칸 '+ok+' / '+all+' · '+(ok===all?'축하합니다!':'정답이 아닌 칸을 다시 확인해 보세요.')};
