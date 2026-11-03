@@ -95,8 +95,34 @@ function nextTurn(s,text){var special=cueFrom(text,s,s.topic);if(special)return 
 if(s.turn<3){var item=s.topic.turns[s.turn];return {text:item.en,ko:item.ko}}
 var ix=s.nextExtra++%followups.length;return {text:followups[ix][0],ko:followups[ix][1]}}
 function createSession(topic){return {topic,turn:0,nextExtra:0,used:new Set(),history:[],translated:false,glossVisible:false}}
-function scoreReply(text){var n=normalize(text),words=n.split(' ').filter(Boolean);if(!words.length)return {okay:false,reason:'말씀해 주세요.'};var okay=words.length>=2||/\b(yes|no|sure|okay|thanks|please|here)\b/.test(n);return {okay,reason:okay?'대화에 응답했습니다. 의미 평가는 규칙 기반 추정입니다.':'짧은 대답도 괜찮아요. 조금 더 알려주세요.'}}
-function markTurn(text){var r=scoreReply(text);progress.attempts++;progress.turns++;if(r.okay)progress.understood++;if(progress.attempts%8===0){var score=progress.understood/Math.max(1,progress.attempts);if(score>=.78)progress.level=Math.min(8,progress.level+1);else if(score<.38)progress.level=Math.max(1,progress.level-1)}persist();petReward('talk',null,null,r.okay);return r}
+
+function scoreReply(text,question,topic,sample){
+ const evaluated=window.YANA_EVAL?.evaluate({question,answer:text,topic,sample});
+ if(evaluated)return {okay:evaluated.accepted,kind:evaluated.kind,reason:evaluated.detail,title:evaluated.title,example:evaluated.example,disclaimer:evaluated.disclaimer};
+ return {okay:false,kind:'unclear',title:'🟠 추가 확인 필요',reason:'현재 대답 평가를 사용할 수 없습니다. 질문을 다시 확인해 주세요.',example:sample||'',disclaimer:'브라우저 규칙 기반 추정'};
+}
+function showEvaluation(id,result){
+ const e=$(id);if(!e)return;
+ e.hidden=false;e.className='meaning-eval '+(result.kind||'unclear');
+ e.innerHTML='<strong>'+esc(result.title)+'</strong><p>'+esc(result.reason)+'</p>'
+ +(result.example?'<small>💬 대답 예시: <b>'+esc(result.example)+'</b></small>':'')
+ +'<small class="evaluation-note">'+esc(result.disclaimer||'규칙 기반 추정')+'</small>';
+}
+function markTurn(text,question,topic,sample){
+ var r=scoreReply(text,question,topic,sample);
+ progress.attempts++;progress.turns++;
+ if(r.okay)progress.understood++;
+ if(!Array.isArray(progress.lastEight))progress.lastEight=[];
+ progress.lastEight.push(r.okay?1:0);if(progress.lastEight.length>8)progress.lastEight.shift();
+ if(progress.lastEight.length===8){
+    let n=progress.lastEight.reduce((a,b)=>a+b,0);
+    if(n>=7 && progress.level<8){progress.level++;progress.lastEight=[]}
+    else if(n<=3 && progress.level>1){progress.level--;progress.lastEight=[]}
+ }
+ persist();petReward('talk',null,null,r.okay);
+ return r;
+}
+
 function chooseTopic(sel){var t=topicAt($(sel).value);return t}
 var g=createSession(D.TOPICS[0]),f=createSession(D.TOPICS[0]);
 function beginGuided(t){g=createSession(t);stage('guidedBg','guidedIcon','guidedStage',t,'guidedScenario');g.history.push({role:'bot',text:t.turns[0].en,ko:t.turns[0].ko});renderChat('guidedHistory',g.history,false);$('guidedProgress').textContent='질문 1 / 계속 대화 가능';$('guidedLevel').textContent='Lv.'+progress.level;$('guidedGlossBox').hidden=true;$('guidedTipBox').hidden=true;$('guidedStatus').textContent='질문을 듣고 자유롭게 답하세요. 문법이 조금 틀려도 괜찮습니다.';$('guidedInput').value='';togglePressed($('guidedTranslate'),false);togglePressed($('guidedGloss'),false)}
